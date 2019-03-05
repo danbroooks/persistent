@@ -116,12 +116,12 @@ persistFileWith :: PersistSettings -> FilePath -> Q Exp
 persistFileWith ps fp = persistManyFileWith ps [fp]
 
 -- | Same as 'persistFileWith', but uses several external files instead of
--- one. Splitting your Persistent definitions into multiple modules can 
+-- one. Splitting your Persistent definitions into multiple modules can
 -- potentially dramatically speed up compile times.
 --
 -- ==== __Examples__
 --
--- Split your Persistent definitions into multiple files (@models1@, @models2@), 
+-- Split your Persistent definitions into multiple files (@models1@, @models2@),
 -- then create a new module for each new file and run 'mkPersist' there:
 --
 -- @
@@ -143,13 +143,13 @@ persistFileWith ps fp = persistManyFileWith ps [fp]
 -- -- Migrate.hs
 -- 'share'
 --     ['mkMigrate' "migrateAll"]
---     $('persistManyFileWith' 'lowerCaseSettings' ["models1","models2"]) 
+--     $('persistManyFileWith' 'lowerCaseSettings' ["models1","models2"])
 -- @
 --
 -- Tip: To get the same import behavior as if you were declaring all your models in
 -- one file, import your new files @as Name@ into another file, then export @module Name@.
 --
--- This approach may be used in the future to reduce memory usage during compilation, 
+-- This approach may be used in the future to reduce memory usage during compilation,
 -- but so far we've only seen mild reductions.
 --
 -- See <https://github.com/yesodweb/persistent/issues/778 persistent#778> and
@@ -362,9 +362,9 @@ mkEntityDefSqlTypeExp emEntities entMap ent = EntityDefSqlTypeExp ent
 -- 'EntityDef's. Works well with the persist quasi-quoter.
 mkPersist :: MkPersistSettings -> [EntityDef] -> Q [Dec]
 mkPersist mps ents' = do
-    x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents
-    y <- fmap mconcat $ mapM (mkEntity entMap mps) ents
-    z <- fmap mconcat $ mapM (mkJSON mps) ents
+    x <- mconcat <$> mapM (persistFieldFromEntity mps) ents
+    y <- mconcat <$> mapM (mkEntity entMap mps) ents
+    z <- mconcat <$> mapM (mkJSON mps) ents
     return $ mconcat [x, y, z]
   where
     ents = map fixEntityDef ents'
