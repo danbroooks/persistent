@@ -25,6 +25,8 @@ module Database.Persist.TH
     , persistManyFileWith
       -- * Turn @EntityDef@s into types
     , mkPersist
+    , mkPersistInstances
+    , mkPersistEntities
     , MkPersistSettings
     , mpsBackend
     , mpsGeneric
@@ -361,14 +363,23 @@ mkEntityDefSqlTypeExp emEntities entMap ent = EntityDefSqlTypeExp ent
 -- | Create data types and appropriate 'PersistEntity' instances for the given
 -- 'EntityDef's. Works well with the persist quasi-quoter.
 mkPersist :: MkPersistSettings -> [EntityDef] -> Q [Dec]
-mkPersist mps ents' = do
-    x <- mconcat <$> mapM (persistFieldFromEntity mps) ents
-    y <- mconcat <$> mapM (mkEntity entMap mps) ents
-    z <- mconcat <$> mapM (mkJSON mps) ents
-    return $ mconcat [x, y, z]
+mkPersist mps entDefs = do
+  instances <- mkPersistInstances mps entDefs
+  entities <- mkPersistEntities mps entDefs
+  return $ mconcat [instances, entities]
+
+mkPersistInstances :: MkPersistSettings -> [EntityDef] -> Q [Dec]
+mkPersistInstances mps =
+  fmap mconcat . mapM (persistFieldFromEntity mps . fixEntityDef)
+
+mkPersistEntities :: MkPersistSettings -> [EntityDef] -> Q [Dec]
+mkPersistEntities mps entDefs = do
+  ents <- mconcat <$> mapM (mkEntity entMap mps . fixEntityDef) entDefs
+  json <- mconcat <$> mapM (mkJSON mps . fixEntityDef) entDefs
+  return $ mconcat [ents, json]
   where
-    ents = map fixEntityDef ents'
-    entMap = M.fromList $ map (\ent -> (entityHaskell ent, ent)) ents
+    entMap =
+      M.fromList $ (\ent -> (entityHaskell ent, ent)) <$> entDefs
 
 -- | Implement special preprocessing on EntityDef as necessary for 'mkPersist'.
 -- For example, strip out any fields marked as MigrationOnly.
