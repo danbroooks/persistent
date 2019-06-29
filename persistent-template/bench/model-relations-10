@@ -1,0 +1,160 @@
+King
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Queen
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Cat
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Dog
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Horse
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Knight
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Bishop
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Rook
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  pawn Pawn Maybe
+  spade Spade Maybe
+
+Pawn
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  spade Spade Maybe
+
+Spade
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+  knight Knight Maybe
+  bishop Bishop Maybe
+  rook Rook Maybe
+  pawn Pawn Maybe
+

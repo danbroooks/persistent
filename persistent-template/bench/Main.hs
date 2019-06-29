@@ -16,7 +16,14 @@ import           Models
 main :: IO ()
 main = defaultMain
     [ bgroup "mkPersist"
-        [ bench "From File" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/models-slowly")
+        [ bgroup "From File"
+          [ bench "models-slowly" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/models-slowly")
+          , bench "model-relations-2" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-2")
+          , bench "model-relations-5" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-5")
+          , bench "model-relations-6" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-6")
+          , bench "model-no-relations-6" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-no-relations-6")
+          , bench "model-relations-7" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-7")
+          ]
         --, bgroup "Non-Null Fields"
         --    , bgroup "Increasing model count"
         --        [ bench "1x10" $ nfIO $ mkPersist' $( parseReferencesQ (mkModels 10 10))
