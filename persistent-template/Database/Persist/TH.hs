@@ -364,9 +364,9 @@ mkEntityDefSqlTypeExp emEntities entMap ent = EntityDefSqlTypeExp ent
 -- 'EntityDef's. Works well with the persist quasi-quoter.
 mkPersist :: MkPersistSettings -> [EntityDef] -> Q [Dec]
 mkPersist mps ents' = do
-    x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents
-    y <- fmap mconcat $ mapM (mkEntity entMap mps) ents
-    z <- fmap mconcat $ mapM (mkJSON mps) ents
+    x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents -- not slow
+    y <- fmap mconcat $ mapM (mkEntity entMap mps) ents -- slowguy
+    z <- fmap mconcat $ mapM (mkJSON mps) ents -- okay
     return $ mconcat [x, y, z]
   where
     ents = map fixEntityDef ents'
