@@ -1,0 +1,55 @@
+King
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+
+Queen
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+
+Cat
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  dog Dog Maybe
+  horse Horse Maybe
+
+Dog
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  horse Horse Maybe
+
+Horse
+  field1 Text Maybe
+  field2 Text Maybe
+  field3 Text Maybe
+  field4 Text Maybe
+  field5 Text Maybe
+  king King Maybe
+  queen Queen Maybe
+  cat Cat Maybe
+  dog Dog Maybe
+  dog2 Dog Maybe

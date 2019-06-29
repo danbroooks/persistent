@@ -364,10 +364,11 @@ mkEntityDefSqlTypeExp emEntities entMap ent = EntityDefSqlTypeExp ent
 -- 'EntityDef's. Works well with the persist quasi-quoter.
 mkPersist :: MkPersistSettings -> [EntityDef] -> Q [Dec]
 mkPersist mps ents' = do
-    x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents -- not slow
+    --x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents -- not slow
     y <- fmap mconcat $ mapM (mkEntity entMap mps) ents -- slowguy
-    z <- fmap mconcat $ mapM (mkJSON mps) ents -- okay
-    return $ mconcat [x, y, z]
+    --z <- fmap mconcat $ mapM (mkJSON mps) ents -- okay
+    --return $ mconcat [x, y, z]
+    return $ mconcat [y]
   where
     ents = map fixEntityDef ents'
     entMap = M.fromList $ map (\ent -> (entityHaskell ent, ent)) ents
@@ -1061,6 +1062,7 @@ mkEntity entMap mps t = do
           [mkClassP ''PersistStore [backendT]]
 
     dtd <- dataTypeDec mps t
+
     return $ addSyn $
        dtd : mconcat fkc `mappend`
       ([ TySynD (keyIdName t) [] $
