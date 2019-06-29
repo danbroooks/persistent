@@ -15,6 +15,60 @@ import           Database.Persist.Quasi
 import           Database.Persist.TH
 import           Models
 
+main :: IO ()
+main = do
+  -- let ents = $(persistFileWith lowerCaseSettings "bench/model-relations-6")
+  -- printCount ents
+  -- printTH $(persistFileWith lowerCaseSettings "bench/model-relations-1")
+  defaultMain
+    [ bgroup "mkPersist"
+        [ bgroup "From File"
+          -- [ bench "models-slowly" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/models-slowly")
+          [ bench "model-relations-1" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-1")
+          , bench "model-relations-2" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-2")
+          , bench "model-relations-3" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-3")
+          , bench "model-relations-4" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-4")
+          , bench "model-relations-5" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-5")
+          , bench "model-relations-6" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-6")
+          , bench "model-relations-7" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-7")
+          , bench "model-relations-8" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-8")
+          , bench "model-relations-9" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-9")
+          ]
+        --, bgroup "Non-Null Fields"
+        --    , bgroup "Increasing model count"
+        --        [ bench "1x10" $ nfIO $ mkPersist' $( parseReferencesQ (mkModels 10 10))
+        --        , bench "10x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 10))
+        --        , bench "100x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 100 10))
+        --        -- , bench "1000x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 1000 10))
+        --        ]
+        --    , bgroup "Increasing field count"
+        --        [ bench "10x1" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 1))
+        --        , bench "10x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 10))
+        --        , bench "10x100" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 100))
+        --        -- , bench "10x1000" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 1000))
+        --        ]
+        --    ]
+        --, bgroup "Nullable"
+        --    [ bgroup "Increasing model count"
+        --        [ bench "20x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 20 10))
+        --        , bench "40x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 40 10))
+        --        , bench "60x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 60 10))
+        --        , bench "80x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 80 10))
+        --        , bench "100x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 100 10))
+        --        -- , bench "1000x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 1000 10))
+        --        ]
+        --    , bgroup "Increasing field count"
+        --        [ bench "10x20" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 20))
+        --        , bench "10x40" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 40))
+        --        , bench "10x60" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 60))
+        --        , bench "10x80" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 80))
+        --        , bench "10x100" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 100))
+        --        -- , bench "10x1000" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 1000))
+        --        ]
+        --    ]
+        ]
+    ]
+
 printCount :: [a] -> IO ()
 printCount = print . length
 
@@ -108,58 +162,6 @@ doReplace = textOp $
       . removeText "GHC.Read."
       . removeText "GHC.Show."
       . removeText "GHC.Types."
-
-main :: IO ()
-main = do
-  --let ents = $(persistFileWith lowerCaseSettings "bench/model-relations-6")
-  --printCount ents
-  printTH $(persistFileWith lowerCaseSettings "bench/model-relations-1")
-  defaultMain
-    [ bgroup "mkPersist"
-        [ bgroup "From File"
-          [
-          -- [ bench "models-slowly" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/models-slowly")
-        --  , bench "model-relations-2" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-2")
-        --  , bench "model-relations-5" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-5")
-        --  , bench "model-relations-5+1" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-5+1")
-          --, bench "model-relations-6" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-6")
-          --, bench "model-no-relations-6" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-no-relations-6")
-          --, bench "model-relations-7" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-7")
-          ]
-        --, bgroup "Non-Null Fields"
-        --    , bgroup "Increasing model count"
-        --        [ bench "1x10" $ nfIO $ mkPersist' $( parseReferencesQ (mkModels 10 10))
-        --        , bench "10x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 10))
-        --        , bench "100x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 100 10))
-        --        -- , bench "1000x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 1000 10))
-        --        ]
-        --    , bgroup "Increasing field count"
-        --        [ bench "10x1" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 1))
-        --        , bench "10x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 10))
-        --        , bench "10x100" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 100))
-        --        -- , bench "10x1000" $ nfIO $ mkPersist' $(parseReferencesQ (mkModels 10 1000))
-        --        ]
-        --    ]
-        --, bgroup "Nullable"
-        --    [ bgroup "Increasing model count"
-        --        [ bench "20x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 20 10))
-        --        , bench "40x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 40 10))
-        --        , bench "60x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 60 10))
-        --        , bench "80x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 80 10))
-        --        , bench "100x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 100 10))
-        --        -- , bench "1000x10" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 1000 10))
-        --        ]
-        --    , bgroup "Increasing field count"
-        --        [ bench "10x20" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 20))
-        --        , bench "10x40" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 40))
-        --        , bench "10x60" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 60))
-        --        , bench "10x80" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 80))
-        --        , bench "10x100" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 100))
-        --        -- , bench "10x1000" $ nfIO $ mkPersist' $(parseReferencesQ (mkNullableModels 10 1000))
-        --        ]
-        --    ]
-        ]
-    ]
 
 -- Orphan instances for NFData Template Haskell types
 instance NFData Overlap where
