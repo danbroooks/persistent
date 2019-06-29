@@ -4,15 +4,15 @@ King
   field3 Text Maybe
   field4 Text Maybe
   field5 Text Maybe
-  queen Queen Maybe
-  queen2 Queen Maybe
-  queen3 Queen Maybe
-  queen4 Queen Maybe
-  queen5 Queen Maybe
-  queen6 Queen Maybe
-  queen7 Queen Maybe
-  queen8 Queen Maybe
-  queen9 Queen Maybe
+  queen Text Maybe
+  queen2 Text Maybe
+  queen3 Text Maybe
+  queen4 Text Maybe
+  queen5 Text Maybe
+  queen6 Text Maybe
+  queen7 Text Maybe
+  queen8 Text Maybe
+  queen9 Text Maybe
 
 Queen
   field1 Text Maybe
@@ -20,15 +20,15 @@ Queen
   field3 Text Maybe
   field4 Text Maybe
   field5 Text Maybe
-  jack Jack Maybe
-  jack2 Jack Maybe
-  jack3 Jack Maybe
-  jack4 Jack Maybe
-  jack5 Jack Maybe
-  jack6 Jack Maybe
-  jack7 Jack Maybe
-  jack8 Jack Maybe
-  jack9 Jack Maybe
+  jack Text Maybe
+  jack2 Text Maybe
+  jack3 Text Maybe
+  jack4 Text Maybe
+  jack5 Text Maybe
+  jack6 Text Maybe
+  jack7 Text Maybe
+  jack8 Text Maybe
+  jack9 Text Maybe
 
 Jack
   field1 Text Maybe
@@ -36,12 +36,12 @@ Jack
   field3 Text Maybe
   field4 Text Maybe
   field5 Text Maybe
-  king King Maybe
-  king2 King Maybe
-  king3 King Maybe
-  king4 King Maybe
-  king5 King Maybe
-  king6 King Maybe
-  king7 King Maybe
-  king8 King Maybe
-  king9 King Maybe
+  king Text Maybe
+  king2 Text Maybe
+  king3 Text Maybe
+  king4 Text Maybe
+  king5 Text Maybe
+  king6 Text Maybe
+  king7 Text Maybe
+  king8 Text Maybe
+  king9 Text Maybe

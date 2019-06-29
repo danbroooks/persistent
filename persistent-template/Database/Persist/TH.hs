@@ -364,11 +364,10 @@ mkEntityDefSqlTypeExp emEntities entMap ent = EntityDefSqlTypeExp ent
 -- 'EntityDef's. Works well with the persist quasi-quoter.
 mkPersist :: MkPersistSettings -> [EntityDef] -> Q [Dec]
 mkPersist mps ents' = do
-    --x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents -- not slow
+    -- x <- fmap Data.Monoid.mconcat $ mapM (persistFieldFromEntity mps) ents -- not slow
     y <- fmap mconcat $ mapM (mkEntity entMap mps) ents -- slowguy
-    --z <- fmap mconcat $ mapM (mkJSON mps) ents -- okay
-    --return $ mconcat [x, y, z]
-    return $ mconcat [y]
+    -- z <- fmap mconcat $ mapM (mkJSON mps) ents -- okay
+    return $ mconcat [y] -- [x, y, z]
   where
     ents = map fixEntityDef ents'
     entMap = M.fromList $ map (\ent -> (entityHaskell ent, ent)) ents
@@ -1043,10 +1042,13 @@ mkEntity entMap mps t = do
     let primaryField = entityId t
 
     fields <- mapM (mkField mps t) $ primaryField : entityFields t
+
     toFieldNames <- mkToFieldNames $ entityUniques t
 
     (keyTypeDec, keyInstanceDecs) <- mkKeyTypeDec mps t
+
     keyToValues' <- mkKeyToValues mps t
+
     keyFromValues' <- mkKeyFromValues mps t
 
     let addSyn -- FIXME maybe remove this
@@ -1058,6 +1060,7 @@ mkEntity entMap mps t = do
     lensClauses <- mkLensClauses mps t
 
     lenses <- mkLenses mps t
+
     let instanceConstraint = if not (mpsGeneric mps) then [] else
           [mkClassP ''PersistStore [backendT]]
 
@@ -1471,7 +1474,7 @@ liftAndFixKeys entMap EntityDef{..} =
       entityDB
       entityId
       entityAttrs
-      $(ListE <$> mapM (liftAndFixKey entMap) entityFields)
+      $(ListE <$> pure []) -- <$> mapM (liftAndFixKey entMap) entityFields)
       entityUniques
       entityForeigns
       entityDerives

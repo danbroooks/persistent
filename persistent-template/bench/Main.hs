@@ -17,15 +17,14 @@ import           Models
 
 main :: IO ()
 main = do
-  -- let ents = $(persistFileWith lowerCaseSettings "bench/model-relations-6")
-  -- printCount ents
   -- printTH $(persistFileWith lowerCaseSettings "bench/model-relations-1")
+--  mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-1")
   defaultMain
     [ bgroup "mkPersist"
         [ bgroup "From File"
           -- [ bench "models-slowly" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/models-slowly")
-          [ bench "model-relations-1" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-1")
-          , bench "model-relations-2" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-2")
+          [ -- bench "model-relations-1" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-1")
+            bench "model-relations-2" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-2")
           , bench "model-relations-3" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-3")
           , bench "model-relations-4" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-4")
           , bench "model-relations-5" $ nfIO $ mkPersist' $(persistFileWith lowerCaseSettings "bench/model-relations-5")
