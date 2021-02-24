@@ -938,17 +938,7 @@ splitExtras
     -> ( [[Text]]
        , M.Map Text [[Text]]
        )
-splitExtras lns =
-    case lns of
-        [] -> ([], M.empty)
-        (Line indent [name]:rest)
-          | not (T.null name) && isUpper (T.head name) ->
-            let (children, rest') = span ((> indent) . lineIndent) rest
-                (x, y) = splitExtras rest'
-             in (x, M.insert name (map tokens children) y)
-        (Line _ ts:rest) ->
-            let (x, y) = splitExtras rest
-             in (ts:x, y)
+splitExtras _ = ([], M.empty)
 
 takeColsEx :: PersistSettings -> [Text] -> Maybe FieldDef
 takeColsEx =
