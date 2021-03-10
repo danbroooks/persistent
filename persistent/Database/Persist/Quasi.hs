@@ -693,39 +693,38 @@ consComment l lwc = lwc { lwcComments = l : lwcComments lwc }
 associateLines :: [Line' NonEmpty] -> [LinesWithComments]
 associateLines lines =
     foldr combine [] $
-    foldr toLinesWithComments [] lines
+    foldr (toLinesWithComments (lowestIndent lines)) [] lines
+
+toLinesWithComments :: Int -> Line' NonEmpty -> [LinesWithComments] -> [LinesWithComments]
+toLinesWithComments lowestTotalIndent line linesWithComments =
+    case linesWithComments of
+        [] ->
+            [newLine line]
+        (lwc : lwcs) ->
+            case isDocComment (NEL.head (tokens line)) of
+                Just comment
+                    | lineIndent line == lowestTotalIndent ->
+                    consComment comment lwc : lwcs
+                _ ->
+                    if lineIndent line <= lineIndent (firstLine lwc)
+                        && lineIndent (firstLine lwc) /= lowestTotalIndent
+                    then
+                        consLine line lwc : lwcs
+                    else
+                        newLine line : lwc : lwcs
+
+combine :: LinesWithComments -> [LinesWithComments] -> [LinesWithComments]
+combine lwc [] =
+    [lwc]
+combine lwc (lwc' : lwcs) =
+    let minIndent = minimumIndentOf lwc
+        otherIndent = minimumIndentOf lwc'
+     in
+        if minIndent < otherIndent then
+            appendLwc lwc lwc' : lwcs
+        else
+            lwc : lwc' : lwcs
   where
-    toLinesWithComments :: Line' NonEmpty -> [LinesWithComments] -> [LinesWithComments]
-    toLinesWithComments line linesWithComments =
-        case linesWithComments of
-            [] ->
-                [newLine line]
-            (lwc : lwcs) ->
-                case isDocComment (NEL.head (tokens line)) of
-                    Just comment
-                        | lineIndent line == lowestIndent lines ->
-                        consComment comment lwc : lwcs
-                    _ ->
-                        if lineIndent line <= lineIndent (firstLine lwc)
-                            && lineIndent (firstLine lwc) /= lowestIndent lines
-                        then
-                            consLine line lwc : lwcs
-                        else
-                            newLine line : lwc : lwcs
-
-    combine :: LinesWithComments -> [LinesWithComments] -> [LinesWithComments]
-    combine lwc [] =
-        [lwc]
-    combine lwc (lwc' : lwcs) =
-        let minIndent = minimumIndentOf lwc
-            otherIndent = minimumIndentOf lwc'
-         in
-            if minIndent < otherIndent then
-                appendLwc lwc lwc' : lwcs
-            else
-                lwc : lwc' : lwcs
-
-
     minimumIndentOf = lowestIndent . lwcLines
 
 skipEmpty :: NonEmpty (Line' []) -> [Line' NonEmpty]
