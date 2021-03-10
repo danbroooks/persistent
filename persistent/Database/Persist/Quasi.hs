@@ -536,7 +536,7 @@ lowerCaseSettings = defaultPersistSettings
 
 -- | Parses a quasi-quoted syntax into a list of entity definitions.
 parse :: PersistSettings -> Text -> [EntityDef]
-parse ps = maybe [] (parseLines ps) . preparse
+parse ps txt = maybe [] NEL.toList $ parseLines ps =<< preparse txt
 
 preparse :: Text -> Maybe (NonEmpty Line)
 preparse txt = do
@@ -651,9 +651,9 @@ lowestIndent
 lowestIndent = minimum . fmap lineIndent
 
 -- | Divide lines into blocks and make entity definitions.
-parseLines :: PersistSettings -> NonEmpty Line -> [EntityDef]
+parseLines :: PersistSettings -> NonEmpty Line -> Maybe (NonEmpty EntityDef)
 parseLines ps =
-    fixForeignKeysAll . map mk . associateLines . skipEmpty
+    fixForeignKeysAll . fmap mk . associateLines . skipEmpty
   where
     mk :: LinesWithComments -> UnboundEntityDef
     mk lwc =
@@ -727,19 +727,19 @@ combine lwc (lwc' : lwcs) =
   where
     minimumIndentOf = lowestIndent . lwcLines
 
-skipEmpty :: NonEmpty (Line' []) -> [Line' NonEmpty]
-skipEmpty = mapMaybe (traverseLine NEL.nonEmpty) . NEL.toList
+skipEmpty :: NonEmpty (Line' []) -> Maybe (NonEmpty (Line' NonEmpty))
+skipEmpty = NEL.nonEmpty . mapMaybe (traverseLine NEL.nonEmpty) . NEL.toList
 
 setComments :: [Text] -> UnboundEntityDef -> UnboundEntityDef
 setComments [] = id
 setComments comments =
     overUnboundEntityDef (\ed -> ed { entityComments = Just (T.unlines comments) })
 
-fixForeignKeysAll :: [UnboundEntityDef] -> [EntityDef]
-fixForeignKeysAll unEnts = map fixForeignKeys unEnts
+fixForeignKeysAll :: NonEmpty UnboundEntityDef -> NonEmpty EntityDef
+fixForeignKeysAll unEnts = fmap fixForeignKeys unEnts
   where
-    ents = map unboundEntityDef unEnts
-    entLookup = M.fromList $ map (\e -> (entityHaskell e, e)) ents
+    ents = fmap unboundEntityDef unEnts
+    entLookup = M.fromList $ NEL.toList $ fmap (\e -> (entityHaskell e, e)) ents
 
     fixForeignKeys :: UnboundEntityDef -> EntityDef
     fixForeignKeys (UnboundEntityDef foreigns ent) =
@@ -779,7 +779,7 @@ fixForeignKeysAll unEnts = map fixForeignKeys unEnts
         pentError =
             error $ "could not find table " ++ show (foreignRefTableHaskell fdef)
             ++ " fdef=" ++ show fdef ++ " allnames="
-            ++ show (map (unEntityNameHS . entityHaskell . unboundEntityDef) unEnts)
+            ++ show (map (unEntityNameHS . entityHaskell . unboundEntityDef) (NEL.toList (unEnts)))
             ++ "\n\nents=" ++ show ents
         pent =
             fromMaybe pentError $ M.lookup (foreignRefTableHaskell fdef) entLookup
