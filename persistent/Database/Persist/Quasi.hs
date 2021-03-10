@@ -536,7 +536,7 @@ lowerCaseSettings = defaultPersistSettings
 
 -- | Parses a quasi-quoted syntax into a list of entity definitions.
 parse :: PersistSettings -> Text -> [EntityDef]
-parse ps txt = maybe [] NEL.toList $ parseLines ps =<< preparse txt
+parse ps txt = maybe [] NEL.toList $ parseLines ps <$> preparse txt
 
 preparse :: Text -> Maybe (NonEmpty Line)
 preparse txt = do
@@ -651,9 +651,9 @@ lowestIndent
 lowestIndent = minimum . fmap lineIndent
 
 -- | Divide lines into blocks and make entity definitions.
-parseLines :: PersistSettings -> NonEmpty Line -> Maybe (NonEmpty EntityDef)
+parseLines :: PersistSettings -> NonEmpty (Line' NonEmpty) -> NonEmpty EntityDef
 parseLines ps =
-    fixForeignKeysAll . fmap mk . associateLines . skipEmpty
+    fixForeignKeysAll . fmap mk . associateLines
   where
     mk :: LinesWithComments -> UnboundEntityDef
     mk lwc =
@@ -690,28 +690,26 @@ consLine l lwc = lwc { lwcLines = NEL.cons l (lwcLines lwc) }
 consComment :: Text -> LinesWithComments -> LinesWithComments
 consComment l lwc = lwc { lwcComments = l : lwcComments lwc }
 
-associateLines :: [Line' NonEmpty] -> [LinesWithComments]
+associateLines :: NonEmpty (Line' NonEmpty) -> NonEmpty LinesWithComments
 associateLines lines =
     foldr combine [] $
     foldr (toLinesWithComments (lowestIndent lines)) [] lines
 
-toLinesWithComments :: Int -> Line' NonEmpty -> [LinesWithComments] -> [LinesWithComments]
+toLinesWithComments :: Int -> Line' NonEmpty -> NonEmpty LinesWithComments -> NonEmpty LinesWithComments
 toLinesWithComments lowestTotalIndent line linesWithComments =
     case linesWithComments of
-        [] ->
-            [newLine line]
-        (lwc : lwcs) ->
+        lwc :| lwcs ->
             case isDocComment (NEL.head (tokens line)) of
                 Just comment
                     | lineIndent line == lowestTotalIndent ->
-                    consComment comment lwc : lwcs
+                    consComment comment lwc :| lwcs
                 _ ->
                     if lineIndent line <= lineIndent (firstLine lwc)
                         && lineIndent (firstLine lwc) /= lowestTotalIndent
                     then
-                        consLine line lwc : lwcs
+                        consLine line lwc :| lwcs
                     else
-                        newLine line : lwc : lwcs
+                        newLine line :| (lwc : lwcs)
 
 combine :: LinesWithComments -> [LinesWithComments] -> [LinesWithComments]
 combine lwc [] =
