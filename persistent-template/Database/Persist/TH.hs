@@ -1118,17 +1118,16 @@ fromValues entDef funName conE fields = do
         UInfixE exp applyE (fpv `AppE` VarE name)
 
     mkPersistValue field =
-        let fieldName = (unFieldNameHS (fieldHaskell field))
-        in [|mapLeft (fieldError tableName fieldName) . fromPersistValue|]
+        [|mapLeft (fieldError tableName (persistFieldDef field)) . fromPersistValue|]
 
 -- |  Render an error message based on the @tableName@ and @fieldName@ with
 -- the provided message.
 --
 -- @since 2.8.2
-fieldError :: Text -> Text -> Text -> Text
-fieldError tableName fieldName err = mconcat
+fieldError :: PersistEntity a => Text -> EntityField a typ -> Text -> Text
+fieldError tableName fieldRef err = mconcat
     [ "Couldn't parse field `"
-    , fieldName
+    , unFieldNameHS (fieldHaskell (persistFieldDef fieldRef))
     , "` from table `"
     , tableName
     , "`. "
@@ -1137,6 +1136,7 @@ fieldError tableName fieldName err = mconcat
 
 mkEntity :: EntityMap -> MkPersistSettings -> EntityDef -> Q [Dec]
 mkEntity entityMap mps entDef = do
+    fields <- mkFields mps entDef
     entityDefExp <- makeEntityDefExp entityMap entDef
     let nameT = unEntityNameHS entName
     let nameS = unpack nameT
@@ -1145,7 +1145,6 @@ mkEntity entityMap mps entDef = do
     fpv <- mkFromPersistValues mps entDef
     utv <- mkUniqueToValues $ entityUniques entDef
     puk <- mkUniqueKeys entDef
-    fields <- mkFields mps entDef
     fkc <- mapM (mkForeignKeysComposite mps entDef) $ entityForeigns entDef
 
     toFieldNames <- mkToFieldNames $ entityUniques entDef
@@ -1191,6 +1190,8 @@ mkEntity entityMap mps entDef = do
                 [d|$(varP 'keyFromRecordM) = Nothing|]
 
     dtd <- dataTypeDec mps entDef
+    let allEntDefs = entityFieldTHCon <$> efthAllFields fields
+        allEntDefClauses = entityFieldTHClause <$> efthAllFields fields
     return $ addSyn $
        dtd : mconcat fkc `mappend`
       ( [ TySynD (keyIdName entDef) [] $
@@ -1213,7 +1214,7 @@ mkEntity entityMap mps entDef = do
             Nothing
             (AppT (AppT (ConT ''EntityField) genDataType) (VarT $ mkName "typ"))
             Nothing
-            (map fst fields)
+            allEntDefs
             []
 #else
         , DataInstD
@@ -1223,10 +1224,10 @@ mkEntity entityMap mps entDef = do
             , VarT $ mkName "typ"
             ]
             Nothing
-            (map fst fields)
+            allEntDefs
             []
 #endif
-        , FunD 'persistFieldDef (map snd fields)
+        , FunD 'persistFieldDef allEntDefClauses
 #if MIN_VERSION_template_haskell(2,15,0)
         , TySynInstD
             (TySynEqn
@@ -1248,10 +1249,20 @@ mkEntity entityMap mps entDef = do
     genDataType = genericDataType mps entName backendT
     entName = entityHaskell entDef
 
-mkFields :: MkPersistSettings -> EntityDef -> Q [(Con, Clause)]
+data EntityFieldsTH = EntityFieldsTH
+    { entityFieldsTHPrimary :: EntityFieldTH
+    , entityFieldsTHFields :: [EntityFieldTH]
+    }
+
+efthAllFields :: EntityFieldsTH -> [EntityFieldTH]
+efthAllFields EntityFieldsTH{..} = entityFieldsTHPrimary : entityFieldsTHFields
+
+mkFields :: MkPersistSettings -> EntityDef -> Q EntityFieldsTH
 mkFields mps entDef = do
     let primaryField = entityId entDef
-    mapM (mkField mps entDef) $ primaryField : entityFields entDef
+    EntityFieldsTH
+      <$> mkField mps entDef primaryField
+      <*> mapM (mkField mps entDef) (entityFields entDef)
 
 mkUniqueKeyInstances :: MkPersistSettings -> EntityDef -> Q [Dec]
 mkUniqueKeyInstances mps t = do
@@ -1722,12 +1733,6 @@ mkMigrate fun allDefs = do
         m <- [|migrate|]
         return $ NoBindS $ m `AppE` defsExp `AppE` u
 
-makeEntityDefDec :: EntityDef -> FieldDef -> Name
-makeEntityDefDec entDef fieldDef = do
-    let entityName   = unEntityNameHS $ entityHaskell entDef
-        fieldName    = upperFirst $ unFieldNameHS (fieldHaskell fieldDef)
-    mkName $ T.unpack (entityName <> fieldName)
-
 makeEntityDefExp :: EntityMap -> EntityDef -> Q Exp
 makeEntityDefExp entityMap ed@EntityDef{..} =
     [|EntityDef
@@ -1735,7 +1740,7 @@ makeEntityDefExp entityMap ed@EntityDef{..} =
         entityDB
         $(liftAndFixKey entityMap entityId)
         entityAttrs
-        $(fieldDefReferences (makeEntityDefDec ed <$> entityFields))
+        $(fieldDefReferences . fmap entityFieldTHName . efthAllFields =<< mkFields sqlSettings ed)
         entityUniques
         entityForeigns
         entityDerives
@@ -1745,12 +1750,12 @@ makeEntityDefExp entityMap ed@EntityDef{..} =
     |]
 
 fieldDefReferences :: [Name] -> Q Exp
-fieldDefReferences fieldDefs = do
+fieldDefReferences fieldDefs =
     lookupValueName "persistFieldDef" >>= \case
-      Nothing -> error "Fatal"
-      Just pfd -> pure $ ListE $ do
-          fieldDef <- fieldDefs
-          pure $ VarE pfd `AppE` ConE fieldDef
+        Nothing -> error "Fatal"
+        Just pfd -> pure $ ListE $ do
+            fieldDef <- fieldDefs
+            pure $ VarE pfd `AppE` ConE fieldDef
 
 liftAndFixKey :: EntityMap -> FieldDef -> Q Exp
 liftAndFixKey entityMap fd@(FieldDef a b c sqlTyp e f fieldRef fc mcomments fg) =
@@ -1815,13 +1820,19 @@ deriving instance Lift PersistUpdate
 
 deriving instance Lift SqlType
 
+data EntityFieldTH = EntityFieldTH
+    { entityFieldTHName :: Name
+    , entityFieldTHCon :: Con
+    , entityFieldTHClause :: Clause
+    }
+
 -- Ent
 --   fieldName FieldType
 --
 -- forall . typ ~ FieldType => EntFieldName
 --
 -- EntFieldName = FieldDef ....
-mkField :: MkPersistSettings -> EntityDef -> FieldDef -> Q (Con, Clause)
+mkField :: MkPersistSettings -> EntityDef -> FieldDef -> Q EntityFieldTH
 mkField mps et cd = do
     let con = ForallC
                 []
@@ -1831,7 +1842,7 @@ mkField mps et cd = do
     let cla = normalClause
                 [ConP name []]
                 bod
-    return (con, cla)
+    return $ EntityFieldTH name con cla
   where
     name = filterConName mps et cd
 
