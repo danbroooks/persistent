@@ -1,0 +1,58 @@
+test/TemplateTestImports.hs:18:1-31: Splicing declarations
+    deriveJSON defaultOptions ''Foo
+  ======>
+    instance aeson-1.4.6.0:Data.Aeson.Types.ToJSON.ToJSON Foo where
+      aeson-1.4.6.0:Data.Aeson.Types.ToJSON.toJSON
+        = \ value_aelN
+            -> case value_aelN of
+                 Bar
+                   -> aeson-1.4.6.0:Data.Aeson.Types.Internal.String
+                        (Data.Text.pack "Bar")
+                 Baz
+                   -> aeson-1.4.6.0:Data.Aeson.Types.Internal.String
+                        (Data.Text.pack "Baz")
+      aeson-1.4.6.0:Data.Aeson.Types.ToJSON.toEncoding
+        = \ value_aelO
+            -> case value_aelO of
+                 Bar -> Data.Aeson.Encoding.Internal.text (Data.Text.pack "Bar")
+                 Baz -> Data.Aeson.Encoding.Internal.text (Data.Text.pack "Baz")
+    instance aeson-1.4.6.0:Data.Aeson.Types.FromJSON.FromJSON Foo where
+      aeson-1.4.6.0:Data.Aeson.Types.FromJSON.parseJSON
+        = \ value_aelP
+            -> case value_aelP of
+                 aeson-1.4.6.0:Data.Aeson.Types.Internal.String txt_aelQ
+                   | (txt_aelQ == Data.Text.pack "Bar") -> pure Bar
+                   | (txt_aelQ == Data.Text.pack "Baz") -> pure Baz
+                   | otherwise
+                   -> (Data.Aeson.TH.noMatchFail "TemplateTestImports.Foo")
+                        (text-1.2.3.1:Data.Text.Show.unpack txt_aelQ)
+                 other_aelR
+                   -> (Data.Aeson.TH.noStringFail "TemplateTestImports.Foo")
+                        (Data.Aeson.TH.valueConName other_aelR)
+test/TemplateTestImports.hs:20:1-28: Splicing declarations
+    derivePersistFieldJSON "Foo"
+  ======>
+    instance PersistField Foo where
+      toPersistValue = (PersistText . toJsonText)
+      fromPersistValue
+        = (\ dt_ag2B v_ag2C
+             -> do text_ag2D <- fromPersistValue v_ag2C
+                   let bs'_ag2E = Data.Text.Encoding.encodeUtf8 text_ag2D
+                   case Data.Aeson.eitherDecodeStrict' bs'_ag2E of
+                     Left e_ag2F
+                       -> (Left
+                             $ (Data.Text.pack "JSON decoding error for "
+                                  Database.Persist.TH.++
+                                    (Data.Text.pack dt_ag2B
+                                       Database.Persist.TH.++
+                                         (Data.Text.pack ": "
+                                            Database.Persist.TH.++
+                                              (Data.Text.pack e_ag2F
+                                                 Database.Persist.TH.++
+                                                   (Data.Text.pack ". On Input: "
+                                                      Database.Persist.TH.++
+                                                        Data.Text.Encoding.decodeUtf8 bs'_ag2E))))))
+                     Right x_ag2G -> Right x_ag2G)
+            "Foo"
+    instance PersistFieldSql Foo where
+      sqlType _ = SqlString

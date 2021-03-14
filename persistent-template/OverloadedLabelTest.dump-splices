@@ -1,0 +1,958 @@
+test/OverloadedLabelTest.hs:(20,41)-(34,2): Splicing expression
+    template-haskell-2.14.0.0:Language.Haskell.TH.Quote.quoteExp
+      persistUpperCase
+      "\n\
+      \\n\
+      \User\n\
+      \    name    String\n\
+      \    age     Int\n\
+      \\n\
+      \Dog\n\
+      \    userId  UserId\n\
+      \    name    String\n\
+      \    age     Int\n\
+      \\n\
+      \Organization\n\
+      \    name    String\n\
+      \\n"
+  ======>
+    [((((((((((EntityDef (EntityNameHS (Data.Text.pack "User")))
+                (EntityNameDB (Data.Text.pack "User")))
+               ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                          (FieldNameDB (Data.Text.pack "id")))
+                         ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                        SqlInt64)
+                       [])
+                      True)
+                     ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                        ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                           (Data.Text.pack "Int64"))))
+                    ((FieldCascade Nothing) Nothing))
+                   Nothing)
+                  Nothing))
+              [])
+             [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                        (FieldNameDB (Data.Text.pack "name")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                      (SqlOther (Data.Text.pack "SqlType unset for name")))
+                     [])
+                    True)
+                   NoReference)
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing,
+              (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                        (FieldNameDB (Data.Text.pack "age")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                      (SqlOther (Data.Text.pack "SqlType unset for age")))
+                     [])
+                    True)
+                   NoReference)
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing])
+            [])
+           [])
+          [])
+         (containers-0.6.0.1:Data.Map.Internal.fromList []))
+        False)
+       Nothing
+       {entityFields = [(((((((((FieldDef
+                                   (FieldNameHS (Data.Text.pack "name")))
+                                  (FieldNameDB (Data.Text.pack "name")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy String)))
+                               [])
+                              True)
+                             NoReference)
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing,
+                        (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                                  (FieldNameDB (Data.Text.pack "age")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                                (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy Int)))
+                               [])
+                              True)
+                             NoReference)
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing],
+        entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                           (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing},
+     ((((((((((EntityDef (EntityNameHS (Data.Text.pack "Dog")))
+                (EntityNameDB (Data.Text.pack "Dog")))
+               ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                          (FieldNameDB (Data.Text.pack "id")))
+                         ((FTTypeCon Nothing) (Data.Text.pack "DogId")))
+                        SqlInt64)
+                       [])
+                      True)
+                     ((ForeignRef (EntityNameHS (Data.Text.pack "Dog")))
+                        ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                           (Data.Text.pack "Int64"))))
+                    ((FieldCascade Nothing) Nothing))
+                   Nothing)
+                  Nothing))
+              [])
+             [(((((((((FieldDef (FieldNameHS (Data.Text.pack "userId")))
+                        (FieldNameDB (Data.Text.pack "userId")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                      (SqlOther (Data.Text.pack "SqlType unset for userId")))
+                     [])
+                    True)
+                   ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                      ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                         (Data.Text.pack "Int64"))))
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing,
+              (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                        (FieldNameDB (Data.Text.pack "name")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                      (SqlOther (Data.Text.pack "SqlType unset for name")))
+                     [])
+                    True)
+                   NoReference)
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing,
+              (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                        (FieldNameDB (Data.Text.pack "age")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                      (SqlOther (Data.Text.pack "SqlType unset for age")))
+                     [])
+                    True)
+                   NoReference)
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing])
+            [])
+           [])
+          [])
+         (containers-0.6.0.1:Data.Map.Internal.fromList []))
+        False)
+       Nothing
+       {entityFields = [(((((((((FieldDef
+                                   (FieldNameHS (Data.Text.pack "userId")))
+                                  (FieldNameDB (Data.Text.pack "userId")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                                (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                               [])
+                              True)
+                             ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                                ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                   (Data.Text.pack "Int64"))))
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing,
+                        (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                                  (FieldNameDB (Data.Text.pack "name")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy String)))
+                               [])
+                              True)
+                             NoReference)
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing,
+                        (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                                  (FieldNameDB (Data.Text.pack "age")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                                (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy Int)))
+                               [])
+                              True)
+                             NoReference)
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing],
+        entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "DogId")))
+                           (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "Dog")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing},
+     ((((((((((EntityDef (EntityNameHS (Data.Text.pack "Organization")))
+                (EntityNameDB (Data.Text.pack "Organization")))
+               ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                          (FieldNameDB (Data.Text.pack "id")))
+                         ((FTTypeCon Nothing) (Data.Text.pack "OrganizationId")))
+                        SqlInt64)
+                       [])
+                      True)
+                     ((ForeignRef (EntityNameHS (Data.Text.pack "Organization")))
+                        ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                           (Data.Text.pack "Int64"))))
+                    ((FieldCascade Nothing) Nothing))
+                   Nothing)
+                  Nothing))
+              [])
+             [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                        (FieldNameDB (Data.Text.pack "name")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                      (SqlOther (Data.Text.pack "SqlType unset for name")))
+                     [])
+                    True)
+                   NoReference)
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing])
+            [])
+           [])
+          [])
+         (containers-0.6.0.1:Data.Map.Internal.fromList []))
+        False)
+       Nothing
+       {entityFields = [(((((((((FieldDef
+                                   (FieldNameHS (Data.Text.pack "name")))
+                                  (FieldNameDB (Data.Text.pack "name")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy String)))
+                               [])
+                              True)
+                             NoReference)
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing],
+        entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "OrganizationId")))
+                           (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "Organization")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing}]
+test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
+    mkPersist
+      sqlSettings
+      ([((((((((((EntityDef (EntityNameHS (Data.Text.pack "User")))
+                   (EntityNameDB (Data.Text.pack "User")))
+                  ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                           SqlInt64)
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing))
+                 [])
+                [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                           (FieldNameDB (Data.Text.pack "name")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                         (SqlOther (Data.Text.pack "SqlType unset for name")))
+                        [])
+                       True)
+                      NoReference)
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing,
+                 (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                           (FieldNameDB (Data.Text.pack "age")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                         (SqlOther (Data.Text.pack "SqlType unset for age")))
+                        [])
+                       True)
+                      NoReference)
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing])
+               [])
+              [])
+             [])
+            (containers-0.6.0.1:Data.Map.Internal.fromList []))
+           False)
+          Nothing
+          {entityFields = [(((((((((FieldDef
+                                      (FieldNameHS (Data.Text.pack "name")))
+                                     (FieldNameDB (Data.Text.pack "name")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                   (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy String)))
+                                  [])
+                                 True)
+                                NoReference)
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing,
+                           (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                                     (FieldNameDB (Data.Text.pack "age")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                                   (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy Int)))
+                                  [])
+                                 True)
+                                NoReference)
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing],
+           entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                                (FieldNameDB (Data.Text.pack "id")))
+                               ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                              (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                             [])
+                            True)
+                           ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                              ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                 (Data.Text.pack "Int64"))))
+                          ((FieldCascade Nothing) Nothing))
+                         Nothing)
+                        Nothing},
+        ((((((((((EntityDef (EntityNameHS (Data.Text.pack "Dog")))
+                   (EntityNameDB (Data.Text.pack "Dog")))
+                  ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "DogId")))
+                           SqlInt64)
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "Dog")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing))
+                 [])
+                [(((((((((FieldDef (FieldNameHS (Data.Text.pack "userId")))
+                           (FieldNameDB (Data.Text.pack "userId")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                         (SqlOther (Data.Text.pack "SqlType unset for userId")))
+                        [])
+                       True)
+                      ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                         ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                            (Data.Text.pack "Int64"))))
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing,
+                 (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                           (FieldNameDB (Data.Text.pack "name")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                         (SqlOther (Data.Text.pack "SqlType unset for name")))
+                        [])
+                       True)
+                      NoReference)
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing,
+                 (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                           (FieldNameDB (Data.Text.pack "age")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                         (SqlOther (Data.Text.pack "SqlType unset for age")))
+                        [])
+                       True)
+                      NoReference)
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing])
+               [])
+              [])
+             [])
+            (containers-0.6.0.1:Data.Map.Internal.fromList []))
+           False)
+          Nothing
+          {entityFields = [(((((((((FieldDef
+                                      (FieldNameHS (Data.Text.pack "userId")))
+                                     (FieldNameDB (Data.Text.pack "userId")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                                   (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                                  [])
+                                 True)
+                                ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                                   ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                      (Data.Text.pack "Int64"))))
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing,
+                           (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                                     (FieldNameDB (Data.Text.pack "name")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                   (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy String)))
+                                  [])
+                                 True)
+                                NoReference)
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing,
+                           (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                                     (FieldNameDB (Data.Text.pack "age")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                                   (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy Int)))
+                                  [])
+                                 True)
+                                NoReference)
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing],
+           entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                                (FieldNameDB (Data.Text.pack "id")))
+                               ((FTTypeCon Nothing) (Data.Text.pack "DogId")))
+                              (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                             [])
+                            True)
+                           ((ForeignRef (EntityNameHS (Data.Text.pack "Dog")))
+                              ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                 (Data.Text.pack "Int64"))))
+                          ((FieldCascade Nothing) Nothing))
+                         Nothing)
+                        Nothing},
+        ((((((((((EntityDef (EntityNameHS (Data.Text.pack "Organization")))
+                   (EntityNameDB (Data.Text.pack "Organization")))
+                  ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "OrganizationId")))
+                           SqlInt64)
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "Organization")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing))
+                 [])
+                [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                           (FieldNameDB (Data.Text.pack "name")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                         (SqlOther (Data.Text.pack "SqlType unset for name")))
+                        [])
+                       True)
+                      NoReference)
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing])
+               [])
+              [])
+             [])
+            (containers-0.6.0.1:Data.Map.Internal.fromList []))
+           False)
+          Nothing
+          {entityFields = [(((((((((FieldDef
+                                      (FieldNameHS (Data.Text.pack "name")))
+                                     (FieldNameDB (Data.Text.pack "name")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                   (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy String)))
+                                  [])
+                                 True)
+                                NoReference)
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing],
+           entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                                (FieldNameDB (Data.Text.pack "id")))
+                               ((FTTypeCon Nothing) (Data.Text.pack "OrganizationId")))
+                              (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                             [])
+                            True)
+                           ((ForeignRef (EntityNameHS (Data.Text.pack "Organization")))
+                              ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                 (Data.Text.pack "Int64"))))
+                          ((FieldCascade Nothing) Nothing))
+                         Nothing)
+                        Nothing}])
+  ======>
+    instance PersistField User where
+      toPersistValue = Database.Persist.TH.entityToPersistValueHelper
+      fromPersistValue
+        = Database.Persist.TH.entityFromPersistValueHelper ["name", "age"]
+    instance PersistFieldSql User where
+      sqlType _ = SqlString
+    instance PersistField Dog where
+      toPersistValue = Database.Persist.TH.entityToPersistValueHelper
+      fromPersistValue
+        = Database.Persist.TH.entityFromPersistValueHelper
+            ["userId", "name", "age"]
+    instance PersistFieldSql Dog where
+      sqlType _ = SqlString
+    instance PersistField Organization where
+      toPersistValue = Database.Persist.TH.entityToPersistValueHelper
+      fromPersistValue
+        = Database.Persist.TH.entityFromPersistValueHelper ["name"]
+    instance PersistFieldSql Organization where
+      sqlType _ = SqlString
+    data User = User {userName :: !String, userAge :: !Int}
+    type UserId = Key User
+    instance PersistEntity User where
+      type PersistEntityBackend User = SqlBackend
+      data Unique User
+      newtype Key User
+        = UserKey {unUserKey :: (BackendKey SqlBackend)}
+        deriving stock Show
+        deriving stock Read
+        deriving newtype Eq
+        deriving newtype Ord
+        deriving newtype path-pieces-0.2.1:Web.PathPieces.PathPiece
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.ToHttpApiData
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.FromHttpApiData
+        deriving newtype PersistField
+        deriving newtype PersistFieldSql
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.ToJSON.ToJSON
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.FromJSON.FromJSON
+      data EntityField User typ
+        = typ ~ Key User => UserId |
+          typ ~ String => UserName |
+          typ ~ Int => UserAge
+      keyToValues = ((: []) . (toPersistValue . unUserKey))
+      keyFromValues
+        = (fmap UserKey
+             . (fromPersistValue . Database.Persist.TH.headNote))
+      keyFromRecordM = Nothing
+      entityDef _
+        = ((((((((((EntityDef (EntityNameHS (Data.Text.pack "User")))
+                     (EntityNameDB (Data.Text.pack "User")))
+                    ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                               (FieldNameDB (Data.Text.pack "id")))
+                              ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                             (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                            [])
+                           True)
+                          ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                             ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                (Data.Text.pack "Int64"))))
+                         ((FieldCascade Nothing) Nothing))
+                        Nothing)
+                       Nothing))
+                   [])
+                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                             (FieldNameDB (Data.Text.pack "name")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                           SqlString)
+                          [])
+                         True)
+                        NoReference)
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing,
+                   (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                             (FieldNameDB (Data.Text.pack "age")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                           SqlInt64)
+                          [])
+                         True)
+                        NoReference)
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing])
+                 [])
+                [])
+               [])
+              (containers-0.6.0.1:Data.Map.Internal.fromList []))
+             False)
+            Nothing
+      toPersistFields (User x_aKqv x_aKqw)
+        = [SomePersistField x_aKqv, SomePersistField x_aKqw]
+      fromPersistValues [x1_aKqy, x2_aKqz]
+        = User
+            <$>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "User")) (Data.Text.pack "name"))
+                 . fromPersistValue)
+                x1_aKqy
+            <*>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "User")) (Data.Text.pack "age"))
+                 . fromPersistValue)
+                x2_aKqz
+      fromPersistValues x_aKqx
+        = (Left
+             $ (mappend (Data.Text.pack "User: fromPersistValues failed on: "))
+                 (Data.Text.pack $ show x_aKqx))
+      persistUniqueToFieldNames _
+        = error "Degenerate case, should never happen"
+      persistUniqueToValues _
+        = error "Degenerate case, should never happen"
+      persistUniqueKeys (User _name_aKqA _age_aKqB) = []
+      persistFieldDef UserId
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                    (FieldNameDB (Data.Text.pack "id")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                  SqlInt64)
+                 [])
+                True)
+               ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                  ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                     (Data.Text.pack "Int64"))))
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef UserName
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                    (FieldNameDB (Data.Text.pack "name")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                  SqlString)
+                 [])
+                True)
+               NoReference)
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef UserAge
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                    (FieldNameDB (Data.Text.pack "age")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                  SqlInt64)
+                 [])
+                True)
+               NoReference)
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistIdField = UserId
+      fieldLens UserId
+        = (lensPTH entityKey)
+            (\ (Entity _ value_aKqC) key_aKqD -> (Entity key_aKqD) value_aKqC)
+      fieldLens UserName
+        = (lensPTH (userName . entityVal))
+            (\ (Entity key_aKqE value_aKqF) x_aKqG
+               -> (Entity key_aKqE) value_aKqF {userName = x_aKqG})
+      fieldLens UserAge
+        = (lensPTH (userAge . entityVal))
+            (\ (Entity key_aKqE value_aKqF) x_aKqG
+               -> (Entity key_aKqE) value_aKqF {userAge = x_aKqG})
+    instance ToBackendKey SqlBackend User where
+      toBackendKey = unUserKey
+      fromBackendKey = UserKey
+    data Dog
+      = Dog {dogUserId :: !(Key User),
+             dogName :: !String,
+             dogAge :: !Int}
+    type DogId = Key Dog
+    instance PersistEntity Dog where
+      type PersistEntityBackend Dog = SqlBackend
+      data Unique Dog
+      newtype Key Dog
+        = DogKey {unDogKey :: (BackendKey SqlBackend)}
+        deriving stock Show
+        deriving stock Read
+        deriving newtype Eq
+        deriving newtype Ord
+        deriving newtype path-pieces-0.2.1:Web.PathPieces.PathPiece
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.ToHttpApiData
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.FromHttpApiData
+        deriving newtype PersistField
+        deriving newtype PersistFieldSql
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.ToJSON.ToJSON
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.FromJSON.FromJSON
+      data EntityField Dog typ
+        = typ ~ Key Dog => DogId |
+          typ ~ Key User => DogUserId |
+          typ ~ String => DogName |
+          typ ~ Int => DogAge
+      keyToValues = ((: []) . (toPersistValue . unDogKey))
+      keyFromValues
+        = (fmap DogKey . (fromPersistValue . Database.Persist.TH.headNote))
+      keyFromRecordM = Nothing
+      entityDef _
+        = ((((((((((EntityDef (EntityNameHS (Data.Text.pack "Dog")))
+                     (EntityNameDB (Data.Text.pack "Dog")))
+                    ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                               (FieldNameDB (Data.Text.pack "id")))
+                              ((FTTypeCon Nothing) (Data.Text.pack "DogId")))
+                             (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                            [])
+                           True)
+                          ((ForeignRef (EntityNameHS (Data.Text.pack "Dog")))
+                             ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                (Data.Text.pack "Int64"))))
+                         ((FieldCascade Nothing) Nothing))
+                        Nothing)
+                       Nothing))
+                   [])
+                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "userId")))
+                             (FieldNameDB (Data.Text.pack "userId")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                           (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                              (Data.Text.pack "Int64"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing,
+                   (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                             (FieldNameDB (Data.Text.pack "name")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                           SqlString)
+                          [])
+                         True)
+                        NoReference)
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing,
+                   (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                             (FieldNameDB (Data.Text.pack "age")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                           SqlInt64)
+                          [])
+                         True)
+                        NoReference)
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing])
+                 [])
+                [])
+               [])
+              (containers-0.6.0.1:Data.Map.Internal.fromList []))
+             False)
+            Nothing
+      toPersistFields (Dog x_aKqH x_aKqI x_aKqJ)
+        = [SomePersistField x_aKqH, SomePersistField x_aKqI,
+           SomePersistField x_aKqJ]
+      fromPersistValues [x1_aKqL, x2_aKqM, x3_aKqN]
+        = Dog
+            <$>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "Dog")) (Data.Text.pack "userId"))
+                 . fromPersistValue)
+                x1_aKqL
+            <*>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "Dog")) (Data.Text.pack "name"))
+                 . fromPersistValue)
+                x2_aKqM
+            <*>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "Dog")) (Data.Text.pack "age"))
+                 . fromPersistValue)
+                x3_aKqN
+      fromPersistValues x_aKqK
+        = (Left
+             $ (mappend (Data.Text.pack "Dog: fromPersistValues failed on: "))
+                 (Data.Text.pack $ show x_aKqK))
+      persistUniqueToFieldNames _
+        = error "Degenerate case, should never happen"
+      persistUniqueToValues _
+        = error "Degenerate case, should never happen"
+      persistUniqueKeys (Dog _userId_aKqO _name_aKqP _age_aKqQ) = []
+      persistFieldDef DogId
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                    (FieldNameDB (Data.Text.pack "id")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "DogId")))
+                  SqlInt64)
+                 [])
+                True)
+               ((ForeignRef (EntityNameHS (Data.Text.pack "Dog")))
+                  ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                     (Data.Text.pack "Int64"))))
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef DogUserId
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "userId")))
+                    (FieldNameDB (Data.Text.pack "userId")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                  SqlInt64)
+                 [])
+                True)
+               ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
+                  ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                     (Data.Text.pack "Int64"))))
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef DogName
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                    (FieldNameDB (Data.Text.pack "name")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                  SqlString)
+                 [])
+                True)
+               NoReference)
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef DogAge
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
+                    (FieldNameDB (Data.Text.pack "age")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "Int")))
+                  SqlInt64)
+                 [])
+                True)
+               NoReference)
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistIdField = DogId
+      fieldLens DogId
+        = (lensPTH entityKey)
+            (\ (Entity _ value_aKqR) key_aKqS -> (Entity key_aKqS) value_aKqR)
+      fieldLens DogUserId
+        = (lensPTH (dogUserId . entityVal))
+            (\ (Entity key_aKqT value_aKqU) x_aKqV
+               -> (Entity key_aKqT) value_aKqU {dogUserId = x_aKqV})
+      fieldLens DogName
+        = (lensPTH (dogName . entityVal))
+            (\ (Entity key_aKqT value_aKqU) x_aKqV
+               -> (Entity key_aKqT) value_aKqU {dogName = x_aKqV})
+      fieldLens DogAge
+        = (lensPTH (dogAge . entityVal))
+            (\ (Entity key_aKqT value_aKqU) x_aKqV
+               -> (Entity key_aKqT) value_aKqU {dogAge = x_aKqV})
+    instance ToBackendKey SqlBackend Dog where
+      toBackendKey = unDogKey
+      fromBackendKey = DogKey
+    data Organization = Organization {organizationName :: !String}
+    type OrganizationId = Key Organization
+    instance PersistEntity Organization where
+      type PersistEntityBackend Organization = SqlBackend
+      data Unique Organization
+      newtype Key Organization
+        = OrganizationKey {unOrganizationKey :: (BackendKey SqlBackend)}
+        deriving stock Show
+        deriving stock Read
+        deriving newtype Eq
+        deriving newtype Ord
+        deriving newtype path-pieces-0.2.1:Web.PathPieces.PathPiece
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.ToHttpApiData
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.FromHttpApiData
+        deriving newtype PersistField
+        deriving newtype PersistFieldSql
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.ToJSON.ToJSON
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.FromJSON.FromJSON
+      data EntityField Organization typ
+        = typ ~ Key Organization => OrganizationId |
+          typ ~ String => OrganizationName
+      keyToValues = ((: []) . (toPersistValue . unOrganizationKey))
+      keyFromValues
+        = (fmap OrganizationKey
+             . (fromPersistValue . Database.Persist.TH.headNote))
+      keyFromRecordM = Nothing
+      entityDef _
+        = ((((((((((EntityDef
+                      (EntityNameHS (Data.Text.pack "Organization")))
+                     (EntityNameDB (Data.Text.pack "Organization")))
+                    ((((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                               (FieldNameDB (Data.Text.pack "id")))
+                              ((FTTypeCon Nothing) (Data.Text.pack "OrganizationId")))
+                             (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
+                            [])
+                           True)
+                          ((ForeignRef (EntityNameHS (Data.Text.pack "Organization")))
+                             ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                                (Data.Text.pack "Int64"))))
+                         ((FieldCascade Nothing) Nothing))
+                        Nothing)
+                       Nothing))
+                   [])
+                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                             (FieldNameDB (Data.Text.pack "name")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                           SqlString)
+                          [])
+                         True)
+                        NoReference)
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing])
+                 [])
+                [])
+               [])
+              (containers-0.6.0.1:Data.Map.Internal.fromList []))
+             False)
+            Nothing
+      toPersistFields (Organization x_aKqW) = [SomePersistField x_aKqW]
+      fromPersistValues [x1_aKqY]
+        = Organization
+            <$>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "Organization"))
+                    (Data.Text.pack "name"))
+                 . fromPersistValue)
+                x1_aKqY
+      fromPersistValues x_aKqX
+        = (Left
+             $ (mappend
+                  (Data.Text.pack "Organization: fromPersistValues failed on: "))
+                 (Data.Text.pack $ show x_aKqX))
+      persistUniqueToFieldNames _
+        = error "Degenerate case, should never happen"
+      persistUniqueToValues _
+        = error "Degenerate case, should never happen"
+      persistUniqueKeys (Organization _name_aKqZ) = []
+      persistFieldDef OrganizationId
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
+                    (FieldNameDB (Data.Text.pack "id")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "OrganizationId")))
+                  SqlInt64)
+                 [])
+                True)
+               ((ForeignRef (EntityNameHS (Data.Text.pack "Organization")))
+                  ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
+                     (Data.Text.pack "Int64"))))
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef OrganizationName
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
+                    (FieldNameDB (Data.Text.pack "name")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                  SqlString)
+                 [])
+                True)
+               NoReference)
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistIdField = OrganizationId
+      fieldLens OrganizationId
+        = (lensPTH entityKey)
+            (\ (Entity _ value_aKr0) key_aKr1 -> (Entity key_aKr1) value_aKr0)
+      fieldLens OrganizationName
+        = (lensPTH (organizationName . entityVal))
+            (\ (Entity key_aKr2 value_aKr3) x_aKr4
+               -> (Entity key_aKr2) value_aKr3 {organizationName = x_aKr4})
+    instance ToBackendKey SqlBackend Organization where
+      toBackendKey = unOrganizationKey
+      fromBackendKey = OrganizationKey
+    instance GHC.TypeLits.TypeError (NoUniqueKeysError User) =>
+             OnlyOneUniqueKey User where
+      onlyUniqueP _ = error "impossible"
+    instance GHC.TypeLits.TypeError (MultipleUniqueKeysError User) =>
+             AtLeastOneUniqueKey User where
+      requireUniquesP _ = error "impossible"
+    instance GHC.TypeLits.TypeError (NoUniqueKeysError Dog) =>
+             OnlyOneUniqueKey Dog where
+      onlyUniqueP _ = error "impossible"
+    instance GHC.TypeLits.TypeError (MultipleUniqueKeysError Dog) =>
+             AtLeastOneUniqueKey Dog where
+      requireUniquesP _ = error "impossible"
+    instance GHC.TypeLits.TypeError (NoUniqueKeysError Organization) =>
+             OnlyOneUniqueKey Organization where
+      onlyUniqueP _ = error "impossible"
+    instance GHC.TypeLits.TypeError (MultipleUniqueKeysError Organization) =>
+             AtLeastOneUniqueKey Organization where
+      requireUniquesP _ = error "impossible"
+    instance SymbolToField "name" User String where
+      symbolToField = UserName
+    instance SymbolToField "age" User Int where
+      symbolToField = UserAge
+    instance SymbolToField "userId" Dog (Key User) where
+      symbolToField = DogUserId
+    instance SymbolToField "name" Dog String where
+      symbolToField = DogName
+    instance SymbolToField "age" Dog Int where
+      symbolToField = DogAge
+    instance SymbolToField "name" Organization String where
+      symbolToField = OrganizationName

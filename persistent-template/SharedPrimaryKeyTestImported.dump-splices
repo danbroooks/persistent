@@ -1,0 +1,237 @@
+test/SharedPrimaryKeyTestImported.hs:(27,51)-(33,2): Splicing expression
+    template-haskell-2.14.0.0:Language.Haskell.TH.Quote.quoteExp
+      persistLowerCase
+      "\n\
+      \\n\
+      \Profile\n\
+      \    Id      UserId\n\
+      \    email   String\n\
+      \\n"
+  ======>
+    [((((((((((EntityDef (EntityNameHS (Data.Text.pack "Profile")))
+                (EntityNameDB (Data.Text.pack "profile")))
+               ((((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
+                          (FieldNameDB (Data.Text.pack "id")))
+                         ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                        (SqlOther (Data.Text.pack "SqlType unset for id")))
+                       [])
+                      True)
+                     ((ForeignRef (EntityNameHS (Data.Text.pack "Profile")))
+                        ((FTTypeCon Nothing) (Data.Text.pack "UserId"))))
+                    ((FieldCascade Nothing) Nothing))
+                   Nothing)
+                  Nothing))
+              [])
+             [(((((((((FieldDef (FieldNameHS (Data.Text.pack "email")))
+                        (FieldNameDB (Data.Text.pack "email")))
+                       ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                      (SqlOther (Data.Text.pack "SqlType unset for email")))
+                     [])
+                    True)
+                   NoReference)
+                  ((FieldCascade Nothing) Nothing))
+                 Nothing)
+                Nothing])
+            [])
+           [])
+          [])
+         (containers-0.6.0.1:Data.Map.Internal.fromList []))
+        False)
+       Nothing
+       {entityFields = [(((((((((FieldDef
+                                   (FieldNameHS (Data.Text.pack "email")))
+                                  (FieldNameDB (Data.Text.pack "email")))
+                                 ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                (sqlType (Proxy :: Proxy String)))
+                               [])
+                              True)
+                             NoReference)
+                            ((FieldCascade Nothing) Nothing))
+                           Nothing)
+                          Nothing],
+        entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                           (sqlType (Proxy :: Proxy UserId)))
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "Profile")))
+                           ((FTTypeCon Nothing) (Data.Text.pack "UserId"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing}]
+test/SharedPrimaryKeyTestImported.hs:(27,1)-(33,2): Splicing declarations
+    share
+      [mkPersist sqlSettings]
+      ([((((((((((EntityDef (EntityNameHS (Data.Text.pack "Profile")))
+                   (EntityNameDB (Data.Text.pack "profile")))
+                  ((((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
+                             (FieldNameDB (Data.Text.pack "id")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                           (SqlOther (Data.Text.pack "SqlType unset for id")))
+                          [])
+                         True)
+                        ((ForeignRef (EntityNameHS (Data.Text.pack "Profile")))
+                           ((FTTypeCon Nothing) (Data.Text.pack "UserId"))))
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing))
+                 [])
+                [(((((((((FieldDef (FieldNameHS (Data.Text.pack "email")))
+                           (FieldNameDB (Data.Text.pack "email")))
+                          ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                         (SqlOther (Data.Text.pack "SqlType unset for email")))
+                        [])
+                       True)
+                      NoReference)
+                     ((FieldCascade Nothing) Nothing))
+                    Nothing)
+                   Nothing])
+               [])
+              [])
+             [])
+            (containers-0.6.0.1:Data.Map.Internal.fromList []))
+           False)
+          Nothing
+          {entityFields = [(((((((((FieldDef
+                                      (FieldNameHS (Data.Text.pack "email")))
+                                     (FieldNameDB (Data.Text.pack "email")))
+                                    ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                                   (sqlType (Proxy :: Proxy String)))
+                                  [])
+                                 True)
+                                NoReference)
+                               ((FieldCascade Nothing) Nothing))
+                              Nothing)
+                             Nothing],
+           entityId = (((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
+                                (FieldNameDB (Data.Text.pack "id")))
+                               ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                              (sqlType (Proxy :: Proxy UserId)))
+                             [])
+                            True)
+                           ((ForeignRef (EntityNameHS (Data.Text.pack "Profile")))
+                              ((FTTypeCon Nothing) (Data.Text.pack "UserId"))))
+                          ((FieldCascade Nothing) Nothing))
+                         Nothing)
+                        Nothing}])
+  ======>
+    instance PersistField Profile where
+      toPersistValue = Database.Persist.TH.entityToPersistValueHelper
+      fromPersistValue
+        = Database.Persist.TH.entityFromPersistValueHelper ["email"]
+    instance PersistFieldSql Profile where
+      sqlType _ = SqlString
+    data Profile = Profile {profileEmail :: !String}
+    type ProfileId = Key Profile
+    instance PersistEntity Profile where
+      type PersistEntityBackend Profile = SqlBackend
+      data Unique Profile
+      newtype Key Profile
+        = ProfileKey {unProfileKey :: UserId}
+        deriving stock Show
+        deriving stock Read
+        deriving newtype Eq
+        deriving newtype Ord
+        deriving newtype path-pieces-0.2.1:Web.PathPieces.PathPiece
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.ToHttpApiData
+        deriving newtype http-api-data-0.4.1.1:Web.Internal.HttpApiData.FromHttpApiData
+        deriving newtype PersistField
+        deriving newtype PersistFieldSql
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.ToJSON.ToJSON
+        deriving newtype aeson-1.4.6.0:Data.Aeson.Types.FromJSON.FromJSON
+      data EntityField Profile typ
+        = typ ~ Key Profile => ProfileId | typ ~ String => ProfileEmail
+      keyToValues = ((: []) . (toPersistValue . unProfileKey))
+      keyFromValues
+        = (fmap ProfileKey
+             . (fromPersistValue . Database.Persist.TH.headNote))
+      keyFromRecordM = Nothing
+      entityDef _
+        = ((((((((((EntityDef (EntityNameHS (Data.Text.pack "Profile")))
+                     (EntityNameDB (Data.Text.pack "profile")))
+                    ((((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
+                               (FieldNameDB (Data.Text.pack "id")))
+                              ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                             (sqlType (Proxy :: Proxy UserId)))
+                            [])
+                           True)
+                          ((ForeignRef (EntityNameHS (Data.Text.pack "Profile")))
+                             ((FTTypeCon Nothing) (Data.Text.pack "UserId"))))
+                         ((FieldCascade Nothing) Nothing))
+                        Nothing)
+                       Nothing))
+                   [])
+                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "email")))
+                             (FieldNameDB (Data.Text.pack "email")))
+                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                           SqlString)
+                          [])
+                         True)
+                        NoReference)
+                       ((FieldCascade Nothing) Nothing))
+                      Nothing)
+                     Nothing])
+                 [])
+                [])
+               [])
+              (containers-0.6.0.1:Data.Map.Internal.fromList []))
+             False)
+            Nothing
+      toPersistFields (Profile x_aFv2) = [SomePersistField x_aFv2]
+      fromPersistValues [x1_aFv4]
+        = Profile
+            <$>
+              (Database.Persist.TH.mapLeft
+                 ((fieldError (Data.Text.pack "profile")) (Data.Text.pack "email"))
+                 . fromPersistValue)
+                x1_aFv4
+      fromPersistValues x_aFv3
+        = (Left
+             $ (mappend
+                  (Data.Text.pack "Profile: fromPersistValues failed on: "))
+                 (Data.Text.pack $ show x_aFv3))
+      persistUniqueToFieldNames _
+        = error "Degenerate case, should never happen"
+      persistUniqueToValues _
+        = error "Degenerate case, should never happen"
+      persistUniqueKeys (Profile _email_aFv5) = []
+      persistFieldDef ProfileId
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
+                    (FieldNameDB (Data.Text.pack "id")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
+                  SqlInt64)
+                 [])
+                True)
+               ((ForeignRef (EntityNameHS (Data.Text.pack "Profile")))
+                  ((FTTypeCon Nothing) (Data.Text.pack "UserId"))))
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistFieldDef ProfileEmail
+        = (((((((((FieldDef (FieldNameHS (Data.Text.pack "email")))
+                    (FieldNameDB (Data.Text.pack "email")))
+                   ((FTTypeCon Nothing) (Data.Text.pack "String")))
+                  SqlString)
+                 [])
+                True)
+               NoReference)
+              ((FieldCascade Nothing) Nothing))
+             Nothing)
+            Nothing
+      persistIdField = ProfileId
+      fieldLens ProfileId
+        = (lensPTH entityKey)
+            (\ (Entity _ value_aFv6) key_aFv7 -> (Entity key_aFv7) value_aFv6)
+      fieldLens ProfileEmail
+        = (lensPTH (profileEmail . entityVal))
+            (\ (Entity key_aFv8 value_aFv9) x_aFva
+               -> (Entity key_aFv8) value_aFv9 {profileEmail = x_aFva})
+    instance GHC.TypeLits.TypeError (NoUniqueKeysError Profile) =>
+             OnlyOneUniqueKey Profile where
+      onlyUniqueP _ = error "impossible"
+    instance GHC.TypeLits.TypeError (MultipleUniqueKeysError Profile) =>
+             AtLeastOneUniqueKey Profile where
+      requireUniquesP _ = error "impossible"
+    instance SymbolToField "email" Profile String where
+      symbolToField = ProfileEmail
