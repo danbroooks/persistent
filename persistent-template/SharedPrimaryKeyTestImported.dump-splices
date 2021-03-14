@@ -162,40 +162,31 @@ test/SharedPrimaryKeyTestImported.hs:(27,1)-(33,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "email")))
-                             (FieldNameDB (Data.Text.pack "email")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef ProfileEmail])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Profile x_aFv2) = [SomePersistField x_aFv2]
-      fromPersistValues [x1_aFv4]
+      toPersistFields (Profile x_axUY) = [SomePersistField x_axUY]
+      fromPersistValues [x1_axV0]
         = Profile
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "profile")) (Data.Text.pack "email"))
                  . fromPersistValue)
-                x1_aFv4
-      fromPersistValues x_aFv3
+                x1_axV0
+      fromPersistValues x_axUZ
         = (Left
              $ (mappend
                   (Data.Text.pack "Profile: fromPersistValues failed on: "))
-                 (Data.Text.pack $ show x_aFv3))
+                 (Data.Text.pack $ show x_axUZ))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Profile _email_aFv5) = []
+      persistUniqueKeys (Profile _email_axV1) = []
       persistFieldDef ProfileId
         = (((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
                     (FieldNameDB (Data.Text.pack "id")))
@@ -222,11 +213,11 @@ test/SharedPrimaryKeyTestImported.hs:(27,1)-(33,2): Splicing declarations
       persistIdField = ProfileId
       fieldLens ProfileId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aFv6) key_aFv7 -> (Entity key_aFv7) value_aFv6)
+            (\ (Entity _ value_axV2) key_axV3 -> (Entity key_axV3) value_axV2)
       fieldLens ProfileEmail
         = (lensPTH (profileEmail . entityVal))
-            (\ (Entity key_aFv8 value_aFv9) x_aFva
-               -> (Entity key_aFv8) value_aFv9 {profileEmail = x_aFva})
+            (\ (Entity key_axV4 value_axV5) x_axV6
+               -> (Entity key_axV4) value_axV5 {profileEmail = x_axV6})
     instance GHC.TypeLits.TypeError (NoUniqueKeysError Profile) =>
              OnlyOneUniqueKey Profile where
       onlyUniqueP _ = error "impossible"

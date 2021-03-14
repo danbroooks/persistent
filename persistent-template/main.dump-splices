@@ -736,91 +736,49 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [pack "json"])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "age")))
-                             (FieldNameDB (pack "age")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [FieldAttrMaybe])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "foo")))
-                             (FieldNameDB (pack "foo")))
-                            ((FTTypeCon Nothing) (pack "Foo")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "address")))
-                             (FieldNameDB (pack "address")))
-                            ((FTTypeCon Nothing) (pack "Address")))
-                           SqlString)
-                          [])
-                         True)
-                        (EmbedRef
-                           ((EmbedEntityDef (EntityNameHS (pack "Address")))
-                              [((EmbedFieldDef (FieldNameDB (pack "street"))) Nothing) Nothing,
-                               ((EmbedFieldDef (FieldNameDB (pack "city"))) Nothing) Nothing,
-                               ((EmbedFieldDef (FieldNameDB (pack "zip"))) Nothing) Nothing])))
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef PersonName, persistFieldDef PersonAge,
+                   persistFieldDef PersonFoo, persistFieldDef PersonAddress])
                  [])
                 [])
                [pack "Show", pack "Eq"])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Person x_aVXt x_aVXu x_aVXv x_aVXw)
-        = [SomePersistField x_aVXt, SomePersistField x_aVXu,
-           SomePersistField x_aVXv, SomePersistField x_aVXw]
-      fromPersistValues [x1_aVXy, x2_aVXz, x3_aVXA, x4_aVXB]
+      toPersistFields (Person x_aPto x_aPtp x_aPtq x_aPtr)
+        = [SomePersistField x_aPto, SomePersistField x_aPtp,
+           SomePersistField x_aPtq, SomePersistField x_aPtr]
+      fromPersistValues [x1_aPtt, x2_aPtu, x3_aPtv, x4_aPtw]
         = Person
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Person")) (pack "name"))
                  . fromPersistValue)
-                x1_aVXy
+                x1_aPtt
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Person")) (pack "age"))
                  . fromPersistValue)
-                x2_aVXz
+                x2_aPtu
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Person")) (pack "foo"))
                  . fromPersistValue)
-                x3_aVXA
+                x3_aPtv
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Person")) (pack "address"))
                  . fromPersistValue)
-                x4_aVXB
-      fromPersistValues x_aVXx
+                x4_aPtw
+      fromPersistValues x_aPts
         = (Left
              $ (mappend (pack "Person: fromPersistValues failed on: "))
-                 (pack $ show x_aVXx))
+                 (pack $ show x_aPts))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
       persistUniqueKeys
-        (Person _name_aVXC _age_aVXD _foo_aVXE _address_aVXF)
+        (Person _name_aPtx _age_aPty _foo_aPtz _address_aPtA)
         = []
       persistFieldDef PersonId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
@@ -885,23 +843,23 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
       persistIdField = PersonId
       fieldLens PersonId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aVXG) key_aVXH -> (Entity key_aVXH) value_aVXG)
+            (\ (Entity _ value_aPtB) key_aPtC -> (Entity key_aPtC) value_aPtB)
       fieldLens PersonName
         = (lensPTH (personName . entityVal))
-            (\ (Entity key_aVXI value_aVXJ) x_aVXK
-               -> (Entity key_aVXI) value_aVXJ {personName = x_aVXK})
+            (\ (Entity key_aPtD value_aPtE) x_aPtF
+               -> (Entity key_aPtD) value_aPtE {personName = x_aPtF})
       fieldLens PersonAge
         = (lensPTH (personAge . entityVal))
-            (\ (Entity key_aVXI value_aVXJ) x_aVXK
-               -> (Entity key_aVXI) value_aVXJ {personAge = x_aVXK})
+            (\ (Entity key_aPtD value_aPtE) x_aPtF
+               -> (Entity key_aPtD) value_aPtE {personAge = x_aPtF})
       fieldLens PersonFoo
         = (lensPTH (personFoo . entityVal))
-            (\ (Entity key_aVXI value_aVXJ) x_aVXK
-               -> (Entity key_aVXI) value_aVXJ {personFoo = x_aVXK})
+            (\ (Entity key_aPtD value_aPtE) x_aPtF
+               -> (Entity key_aPtD) value_aPtE {personFoo = x_aPtF})
       fieldLens PersonAddress
         = (lensPTH (personAddress . entityVal))
-            (\ (Entity key_aVXI value_aVXJ) x_aVXK
-               -> (Entity key_aVXI) value_aVXJ {personAddress = x_aVXK})
+            (\ (Entity key_aPtD value_aPtE) x_aPtF
+               -> (Entity key_aPtD) value_aPtE {personAddress = x_aPtF})
     instance ToBackendKey SqlBackend Person where
       toBackendKey = unPersonKey
       fromBackendKey = PersonKey
@@ -950,42 +908,32 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "person")))
-                             (FieldNameDB (pack "person")))
-                            ((FTTypeCon Nothing) (pack "PersonId")))
-                           (sqlType (Proxy :: Proxy Int64)))
-                          [])
-                         True)
-                        ((ForeignRef (EntityNameHS (pack "Person")))
-                           ((FTTypeCon (Just (pack "Data.Int"))) (pack "Int64"))))
-                       ((FieldCascade Nothing) (Just Cascade)))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef HasSimpleCascadeRefPerson])
                  [])
                 [])
                [pack "Show", pack "Eq"])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (HasSimpleCascadeRef x_aVXL)
-        = [SomePersistField x_aVXL]
-      fromPersistValues [x1_aVXN]
+      toPersistFields (HasSimpleCascadeRef x_aPtG)
+        = [SomePersistField x_aPtG]
+      fromPersistValues [x1_aPtI]
         = HasSimpleCascadeRef
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "HasSimpleCascadeRef")) (pack "person"))
                  . fromPersistValue)
-                x1_aVXN
-      fromPersistValues x_aVXM
+                x1_aPtI
+      fromPersistValues x_aPtH
         = (Left
              $ (mappend
                   (pack "HasSimpleCascadeRef: fromPersistValues failed on: "))
-                 (pack $ show x_aVXM))
+                 (pack $ show x_aPtH))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (HasSimpleCascadeRef _person_aVXO) = []
+      persistUniqueKeys (HasSimpleCascadeRef _person_aPtJ) = []
       persistFieldDef HasSimpleCascadeRefId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -1013,12 +961,12 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
       persistIdField = HasSimpleCascadeRefId
       fieldLens HasSimpleCascadeRefId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aVXP) key_aVXQ -> (Entity key_aVXQ) value_aVXP)
+            (\ (Entity _ value_aPtK) key_aPtL -> (Entity key_aPtL) value_aPtK)
       fieldLens HasSimpleCascadeRefPerson
         = (lensPTH (hasSimpleCascadeRefPerson . entityVal))
-            (\ (Entity key_aVXR value_aVXS) x_aVXT
-               -> (Entity key_aVXR)
-                    value_aVXS {hasSimpleCascadeRefPerson = x_aVXT})
+            (\ (Entity key_aPtM value_aPtN) x_aPtO
+               -> (Entity key_aPtM)
+                    value_aPtN {hasSimpleCascadeRefPerson = x_aPtO})
     instance ToBackendKey SqlBackend HasSimpleCascadeRef where
       toBackendKey = unHasSimpleCascadeRefKey
       fromBackendKey = HasSimpleCascadeRefKey
@@ -1070,71 +1018,43 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [pack "json"])
-                  [(((((((((FieldDef (FieldNameHS (pack "street")))
-                             (FieldNameDB (pack "street")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "city")))
-                             (FieldNameDB (pack "city")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "zip")))
-                             (FieldNameDB (pack "zip")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [FieldAttrMaybe])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef AddressStreet, persistFieldDef AddressCity,
+                   persistFieldDef AddressZip])
                  [])
                 [])
                [pack "Show", pack "Eq"])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Address x_aVXU x_aVXV x_aVXW)
-        = [SomePersistField x_aVXU, SomePersistField x_aVXV,
-           SomePersistField x_aVXW]
-      fromPersistValues [x1_aVXY, x2_aVXZ, x3_aVY0]
+      toPersistFields (Address x_aPtP x_aPtQ x_aPtR)
+        = [SomePersistField x_aPtP, SomePersistField x_aPtQ,
+           SomePersistField x_aPtR]
+      fromPersistValues [x1_aPtT, x2_aPtU, x3_aPtV]
         = Address
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Address")) (pack "street"))
                  . fromPersistValue)
-                x1_aVXY
+                x1_aPtT
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Address")) (pack "city"))
                  . fromPersistValue)
-                x2_aVXZ
+                x2_aPtU
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "Address")) (pack "zip"))
                  . fromPersistValue)
-                x3_aVY0
-      fromPersistValues x_aVXX
+                x3_aPtV
+      fromPersistValues x_aPtS
         = (Left
              $ (mappend (pack "Address: fromPersistValues failed on: "))
-                 (pack $ show x_aVXX))
+                 (pack $ show x_aPtS))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Address _street_aVY1 _city_aVY2 _zip_aVY3) = []
+      persistUniqueKeys (Address _street_aPtW _city_aPtX _zip_aPtY) = []
       persistFieldDef AddressId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -1183,19 +1103,19 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
       persistIdField = AddressId
       fieldLens AddressId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aVY4) key_aVY5 -> (Entity key_aVY5) value_aVY4)
+            (\ (Entity _ value_aPtZ) key_aPu0 -> (Entity key_aPu0) value_aPtZ)
       fieldLens AddressStreet
         = (lensPTH (addressStreet . entityVal))
-            (\ (Entity key_aVY6 value_aVY7) x_aVY8
-               -> (Entity key_aVY6) value_aVY7 {addressStreet = x_aVY8})
+            (\ (Entity key_aPu1 value_aPu2) x_aPu3
+               -> (Entity key_aPu1) value_aPu2 {addressStreet = x_aPu3})
       fieldLens AddressCity
         = (lensPTH (addressCity . entityVal))
-            (\ (Entity key_aVY6 value_aVY7) x_aVY8
-               -> (Entity key_aVY6) value_aVY7 {addressCity = x_aVY8})
+            (\ (Entity key_aPu1 value_aPu2) x_aPu3
+               -> (Entity key_aPu1) value_aPu2 {addressCity = x_aPu3})
       fieldLens AddressZip
         = (lensPTH (addressZip . entityVal))
-            (\ (Entity key_aVY6 value_aVY7) x_aVY8
-               -> (Entity key_aVY6) value_aVY7 {addressZip = x_aVY8})
+            (\ (Entity key_aPu1 value_aPu2) x_aPu3
+               -> (Entity key_aPu1) value_aPu2 {addressZip = x_aPu3})
     instance ToBackendKey SqlBackend Address where
       toBackendKey = unAddressKey
       fromBackendKey = AddressKey
@@ -1242,39 +1162,30 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "foo")))
-                             (FieldNameDB (pack "foo")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef NoJsonFoo])
                  [])
                 [])
                [pack "Show", pack "Eq"])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (NoJson x_aVY9) = [SomePersistField x_aVY9]
-      fromPersistValues [x1_aVYb]
+      toPersistFields (NoJson x_aPu4) = [SomePersistField x_aPu4]
+      fromPersistValues [x1_aPu6]
         = NoJson
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "NoJson")) (pack "foo"))
                  . fromPersistValue)
-                x1_aVYb
-      fromPersistValues x_aVYa
+                x1_aPu6
+      fromPersistValues x_aPu5
         = (Left
              $ (mappend (pack "NoJson: fromPersistValues failed on: "))
-                 (pack $ show x_aVYa))
+                 (pack $ show x_aPu5))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (NoJson _foo_aVYc) = []
+      persistUniqueKeys (NoJson _foo_aPu7) = []
       persistFieldDef NoJsonId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -1301,40 +1212,40 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
       persistIdField = NoJsonId
       fieldLens NoJsonId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aVYd) key_aVYe -> (Entity key_aVYe) value_aVYd)
+            (\ (Entity _ value_aPu8) key_aPu9 -> (Entity key_aPu9) value_aPu8)
       fieldLens NoJsonFoo
         = (lensPTH (noJsonFoo . entityVal))
-            (\ (Entity key_aVYf value_aVYg) x_aVYh
-               -> (Entity key_aVYf) value_aVYg {noJsonFoo = x_aVYh})
+            (\ (Entity key_aPua value_aPub) x_aPuc
+               -> (Entity key_aPua) value_aPub {noJsonFoo = x_aPuc})
     instance ToBackendKey SqlBackend NoJson where
       toBackendKey = unNoJsonKey
       fromBackendKey = NoJsonKey
     instance ToJSON Person where
-      toJSON (Person name_aVYj age_aVYk foo_aVYl address_aVYm)
+      toJSON (Person name_aPue age_aPuf foo_aPug address_aPuh)
         = object
-            [(pack "name" .= name_aVYj), (pack "age" .= age_aVYk),
-             (pack "foo" .= foo_aVYl), (pack "address" .= address_aVYm)]
+            [(pack "name" .= name_aPue), (pack "age" .= age_aPuf),
+             (pack "foo" .= foo_aPug), (pack "address" .= address_aPuh)]
     instance FromJSON Person where
-      parseJSON (Object obj_aVYi)
-        = ((((pure Person <*> (obj_aVYi .: pack "name"))
-               <*> (obj_aVYi .:? pack "age"))
-              <*> (obj_aVYi .: pack "foo"))
-             <*> (obj_aVYi .: pack "address"))
+      parseJSON (Object obj_aPud)
+        = ((((pure Person <*> (obj_aPud .: pack "name"))
+               <*> (obj_aPud .:? pack "age"))
+              <*> (obj_aPud .: pack "foo"))
+             <*> (obj_aPud .: pack "address"))
       parseJSON _ = GHC.Base.mzero
     instance ToJSON (Entity Person) where
       toJSON = entityIdToJSON
     instance FromJSON (Entity Person) where
       parseJSON = entityIdFromJSON
     instance ToJSON Address where
-      toJSON (Address street_aVYo city_aVYp zip_aVYq)
+      toJSON (Address street_aPuj city_aPuk zip_aPul)
         = object
-            [(pack "street" .= street_aVYo), (pack "city" .= city_aVYp),
-             (pack "zip" .= zip_aVYq)]
+            [(pack "street" .= street_aPuj), (pack "city" .= city_aPuk),
+             (pack "zip" .= zip_aPul)]
     instance FromJSON Address where
-      parseJSON (Object obj_aVYn)
-        = (((pure Address <*> (obj_aVYn .: pack "street"))
-              <*> (obj_aVYn .: pack "city"))
-             <*> (obj_aVYn .:? pack "zip"))
+      parseJSON (Object obj_aPui)
+        = (((pure Address <*> (obj_aPui .: pack "street"))
+              <*> (obj_aPui .: pack "city"))
+             <*> (obj_aPui .:? pack "zip"))
       parseJSON _ = GHC.Base.mzero
     instance ToJSON (Entity Address) where
       toJSON = entityIdToJSON
@@ -1385,22 +1296,22 @@ test/main.hs:(52,1)-(73,2): Splicing declarations
     instance (PersistQuery backend,
               PersistEntityBackend Person ~ BaseBackend backend) =>
              DeleteCascade Person backend where
-      deleteCascade key_aVYr
+      deleteCascade key_aPum
         = do deleteCascadeWhere
-               [((Filter HasSimpleCascadeRefPerson) (FilterValue key_aVYr)) Eq]
-             delete key_aVYr
+               [((Filter HasSimpleCascadeRefPerson) (FilterValue key_aPum)) Eq]
+             delete key_aPum
     instance (PersistQuery backend,
               PersistEntityBackend HasSimpleCascadeRef ~ BaseBackend backend) =>
              DeleteCascade HasSimpleCascadeRef backend where
-      deleteCascade key_aVYs = do delete key_aVYs
+      deleteCascade key_aPun = do delete key_aPun
     instance (PersistQuery backend,
               PersistEntityBackend Address ~ BaseBackend backend) =>
              DeleteCascade Address backend where
-      deleteCascade key_aVYt = do delete key_aVYt
+      deleteCascade key_aPuo = do delete key_aPuo
     instance (PersistQuery backend,
               PersistEntityBackend NoJson ~ BaseBackend backend) =>
              DeleteCascade NoJson backend where
-      deleteCascade key_aVYu = do delete key_aVYu
+      deleteCascade key_aPup = do delete key_aPup
 test/main.hs:(75,41)-(108,2): Splicing expression
     template-haskell-2.14.0.0:Language.Haskell.TH.Quote.quoteExp
       persistLowerCase
@@ -2577,21 +2488,21 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
           typ ~ Int => HasPrimaryDefUserId |
           typ ~ String => HasPrimaryDefName
       keyToValues record = [toPersistValue (unHasPrimaryDefKey record)]
-      keyFromValues [x1_aYHl]
+      keyFromValues [x1_aS9x]
         = HasPrimaryDefKey
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_primary_def")) (pack "userId"))
                  . fromPersistValue)
-                x1_aYHl
-      keyFromValues x_aYHk
+                x1_aS9x
+      keyFromValues x_aS9w
         = (Left
              $ (mappend (pack "HasPrimaryDef: keyFromValues failed on: "))
-                 (pack $ show x_aYHk))
+                 (pack $ show x_aS9w))
       keyFromRecordM
         = Just
-            (\ record_aYHr
-               -> HasPrimaryDefKey (hasPrimaryDefUserId record_aYHr))
+            (\ record_aS9D
+               -> HasPrimaryDefKey (hasPrimaryDefUserId record_aS9D))
       entityDef _
         = ((((((((((EntityDef (EntityNameHS (pack "HasPrimaryDef")))
                      (EntityNameDB (pack "has_primary_def")))
@@ -2618,55 +2529,37 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "userId")))
-                             (FieldNameDB (pack "user_id")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef HasPrimaryDefUserId,
+                   persistFieldDef HasPrimaryDefName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (HasPrimaryDef x_aYHd x_aYHe)
-        = [SomePersistField x_aYHd, SomePersistField x_aYHe]
-      fromPersistValues [x1_aYHg, x2_aYHh]
+      toPersistFields (HasPrimaryDef x_aS9p x_aS9q)
+        = [SomePersistField x_aS9p, SomePersistField x_aS9q]
+      fromPersistValues [x1_aS9s, x2_aS9t]
         = HasPrimaryDef
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_primary_def")) (pack "userId"))
                  . fromPersistValue)
-                x1_aYHg
+                x1_aS9s
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_primary_def")) (pack "name"))
                  . fromPersistValue)
-                x2_aYHh
-      fromPersistValues x_aYHf
+                x2_aS9t
+      fromPersistValues x_aS9r
         = (Left
              $ (mappend (pack "HasPrimaryDef: fromPersistValues failed on: "))
-                 (pack $ show x_aYHf))
+                 (pack $ show x_aS9r))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (HasPrimaryDef _userId_aYHi _name_aYHj) = []
+      persistUniqueKeys (HasPrimaryDef _userId_aS9u _name_aS9v) = []
       persistFieldDef HasPrimaryDefId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -2715,15 +2608,15 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = HasPrimaryDefId
       fieldLens HasPrimaryDefId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYHm) key_aYHn -> (Entity key_aYHn) value_aYHm)
+            (\ (Entity _ value_aS9y) key_aS9z -> (Entity key_aS9z) value_aS9y)
       fieldLens HasPrimaryDefUserId
         = (lensPTH (hasPrimaryDefUserId . entityVal))
-            (\ (Entity key_aYHo value_aYHp) x_aYHq
-               -> (Entity key_aYHo) value_aYHp {hasPrimaryDefUserId = x_aYHq})
+            (\ (Entity key_aS9A value_aS9B) x_aS9C
+               -> (Entity key_aS9A) value_aS9B {hasPrimaryDefUserId = x_aS9C})
       fieldLens HasPrimaryDefName
         = (lensPTH (hasPrimaryDefName . entityVal))
-            (\ (Entity key_aYHo value_aYHp) x_aYHq
-               -> (Entity key_aYHo) value_aYHp {hasPrimaryDefName = x_aYHq})
+            (\ (Entity key_aS9A value_aS9B) x_aS9C
+               -> (Entity key_aS9A) value_aS9B {hasPrimaryDefName = x_aS9C})
     data HasMultipleColPrimaryDef
       = HasMultipleColPrimaryDef {hasMultipleColPrimaryDefFoobar :: !Int,
                                   hasMultipleColPrimaryDefBarbaz :: !String}
@@ -2746,31 +2639,31 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       keyToValues record
         = [toPersistValue (hasMultipleColPrimaryDefKeyfoobar record),
            toPersistValue (hasMultipleColPrimaryDefKeybarbaz record)]
-      keyFromValues [x1_aYHC, x2_aYHD]
+      keyFromValues [x1_aS9O, x2_aS9P]
         = HasMultipleColPrimaryDefKey
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_multiple_col_primary_def"))
                     (pack "foobar"))
                  . fromPersistValue)
-                x1_aYHC
+                x1_aS9O
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_multiple_col_primary_def"))
                     (pack "barbaz"))
                  . fromPersistValue)
-                x2_aYHD
-      keyFromValues x_aYHB
+                x2_aS9P
+      keyFromValues x_aS9N
         = (Left
              $ (mappend
                   (pack "HasMultipleColPrimaryDef: keyFromValues failed on: "))
-                 (pack $ show x_aYHB))
+                 (pack $ show x_aS9N))
       keyFromRecordM
         = Just
-            (\ record_aYHJ
+            (\ record_aS9V
                -> (HasMultipleColPrimaryDefKey
-                     (hasMultipleColPrimaryDefFoobar record_aYHJ))
-                    (hasMultipleColPrimaryDefBarbaz record_aYHJ))
+                     (hasMultipleColPrimaryDefFoobar record_aS9V))
+                    (hasMultipleColPrimaryDefBarbaz record_aS9V))
       entityDef _
         = ((((((((((EntityDef
                       (EntityNameHS (pack "HasMultipleColPrimaryDef")))
@@ -2808,59 +2701,41 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "foobar")))
-                             (FieldNameDB (pack "foobar")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "barbaz")))
-                             (FieldNameDB (pack "barbaz")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef HasMultipleColPrimaryDefFoobar,
+                   persistFieldDef HasMultipleColPrimaryDefBarbaz])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (HasMultipleColPrimaryDef x_aYHs x_aYHt)
-        = [SomePersistField x_aYHs, SomePersistField x_aYHt]
-      fromPersistValues [x1_aYHv, x2_aYHw]
+      toPersistFields (HasMultipleColPrimaryDef x_aS9E x_aS9F)
+        = [SomePersistField x_aS9E, SomePersistField x_aS9F]
+      fromPersistValues [x1_aS9H, x2_aS9I]
         = HasMultipleColPrimaryDef
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_multiple_col_primary_def"))
                     (pack "foobar"))
                  . fromPersistValue)
-                x1_aYHv
+                x1_aS9H
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_multiple_col_primary_def"))
                     (pack "barbaz"))
                  . fromPersistValue)
-                x2_aYHw
-      fromPersistValues x_aYHu
+                x2_aS9I
+      fromPersistValues x_aS9G
         = (Left
              $ (mappend
                   (pack "HasMultipleColPrimaryDef: fromPersistValues failed on: "))
-                 (pack $ show x_aYHu))
+                 (pack $ show x_aS9G))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
       persistUniqueKeys
-        (HasMultipleColPrimaryDef _foobar_aYHx _barbaz_aYHy)
+        (HasMultipleColPrimaryDef _foobar_aS9J _barbaz_aS9K)
         = []
       persistFieldDef HasMultipleColPrimaryDefId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
@@ -2920,24 +2795,24 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = HasMultipleColPrimaryDefId
       fieldLens HasMultipleColPrimaryDefId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYHE) key_aYHF -> (Entity key_aYHF) value_aYHE)
+            (\ (Entity _ value_aS9Q) key_aS9R -> (Entity key_aS9R) value_aS9Q)
       fieldLens HasMultipleColPrimaryDefFoobar
         = (lensPTH (hasMultipleColPrimaryDefFoobar . entityVal))
-            (\ (Entity key_aYHG value_aYHH) x_aYHI
-               -> (Entity key_aYHG)
-                    value_aYHH {hasMultipleColPrimaryDefFoobar = x_aYHI})
+            (\ (Entity key_aS9S value_aS9T) x_aS9U
+               -> (Entity key_aS9S)
+                    value_aS9T {hasMultipleColPrimaryDefFoobar = x_aS9U})
       fieldLens HasMultipleColPrimaryDefBarbaz
         = (lensPTH (hasMultipleColPrimaryDefBarbaz . entityVal))
-            (\ (Entity key_aYHG value_aYHH) x_aYHI
-               -> (Entity key_aYHG)
-                    value_aYHH {hasMultipleColPrimaryDefBarbaz = x_aYHI})
+            (\ (Entity key_aS9S value_aS9T) x_aS9U
+               -> (Entity key_aS9S)
+                    value_aS9T {hasMultipleColPrimaryDefBarbaz = x_aS9U})
     instance PersistField (Key HasMultipleColPrimaryDef) where
       toPersistValue = (PersistList . keyToValues)
-      fromPersistValue (PersistList l_aYHz) = keyFromValues l_aYHz
-      fromPersistValue got_aYHA
+      fromPersistValue (PersistList l_aS9L) = keyFromValues l_aS9L
+      fromPersistValue got_aS9M
         = (error
              $ ("fromPersistValue: expected PersistList, got: "
-                  `mappend` show got_aYHA))
+                  `mappend` show got_aS9M))
     instance PersistFieldSql (Key HasMultipleColPrimaryDef) where
       sqlType _ = SqlString
     instance ToJSON (Key HasMultipleColPrimaryDef)
@@ -2982,39 +2857,30 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef HasIdDefName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (HasIdDef x_aYHK) = [SomePersistField x_aYHK]
-      fromPersistValues [x1_aYHM]
+      toPersistFields (HasIdDef x_aS9W) = [SomePersistField x_aS9W]
+      fromPersistValues [x1_aS9Y]
         = HasIdDef
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_id_def")) (pack "name"))
                  . fromPersistValue)
-                x1_aYHM
-      fromPersistValues x_aYHL
+                x1_aS9Y
+      fromPersistValues x_aS9X
         = (Left
              $ (mappend (pack "HasIdDef: fromPersistValues failed on: "))
-                 (pack $ show x_aYHL))
+                 (pack $ show x_aS9X))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (HasIdDef _name_aYHN) = []
+      persistUniqueKeys (HasIdDef _name_aS9Z) = []
       persistFieldDef HasIdDefId
         = (((((((((FieldDef (FieldNameHS (pack "id")))
                     (FieldNameDB (pack "id")))
@@ -3041,11 +2907,11 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = HasIdDefId
       fieldLens HasIdDefId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYHO) key_aYHP -> (Entity key_aYHP) value_aYHO)
+            (\ (Entity _ value_aSa0) key_aSa1 -> (Entity key_aSa1) value_aSa0)
       fieldLens HasIdDefName
         = (lensPTH (hasIdDefName . entityVal))
-            (\ (Entity key_aYHQ value_aYHR) x_aYHS
-               -> (Entity key_aYHQ) value_aYHR {hasIdDefName = x_aYHS})
+            (\ (Entity key_aSa2 value_aSa3) x_aSa4
+               -> (Entity key_aSa2) value_aSa3 {hasIdDefName = x_aSa4})
     data HasDefaultId = HasDefaultId {hasDefaultIdName :: !String}
     type HasDefaultIdId = Key HasDefaultId
     instance PersistEntity HasDefaultId where
@@ -3087,39 +2953,30 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef HasDefaultIdName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (HasDefaultId x_aYHT) = [SomePersistField x_aYHT]
-      fromPersistValues [x1_aYHV]
+      toPersistFields (HasDefaultId x_aSa5) = [SomePersistField x_aSa5]
+      fromPersistValues [x1_aSa7]
         = HasDefaultId
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_default_id")) (pack "name"))
                  . fromPersistValue)
-                x1_aYHV
-      fromPersistValues x_aYHU
+                x1_aSa7
+      fromPersistValues x_aSa6
         = (Left
              $ (mappend (pack "HasDefaultId: fromPersistValues failed on: "))
-                 (pack $ show x_aYHU))
+                 (pack $ show x_aSa6))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (HasDefaultId _name_aYHW) = []
+      persistUniqueKeys (HasDefaultId _name_aSa8) = []
       persistFieldDef HasDefaultIdId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -3146,11 +3003,11 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = HasDefaultIdId
       fieldLens HasDefaultIdId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYHX) key_aYHY -> (Entity key_aYHY) value_aYHX)
+            (\ (Entity _ value_aSa9) key_aSaa -> (Entity key_aSaa) value_aSa9)
       fieldLens HasDefaultIdName
         = (lensPTH (hasDefaultIdName . entityVal))
-            (\ (Entity key_aYHZ value_aYI0) x_aYI1
-               -> (Entity key_aYHZ) value_aYI0 {hasDefaultIdName = x_aYI1})
+            (\ (Entity key_aSab value_aSac) x_aSad
+               -> (Entity key_aSab) value_aSac {hasDefaultIdName = x_aSad})
     instance ToBackendKey SqlBackend HasDefaultId where
       toBackendKey = unHasDefaultIdKey
       fromBackendKey = HasDefaultIdKey
@@ -3196,39 +3053,30 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef HasCustomSqlIdName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (HasCustomSqlId x_aYI2) = [SomePersistField x_aYI2]
-      fromPersistValues [x1_aYI4]
+      toPersistFields (HasCustomSqlId x_aSae) = [SomePersistField x_aSae]
+      fromPersistValues [x1_aSag]
         = HasCustomSqlId
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "has_custom_sql_id")) (pack "name"))
                  . fromPersistValue)
-                x1_aYI4
-      fromPersistValues x_aYI3
+                x1_aSag
+      fromPersistValues x_aSaf
         = (Left
              $ (mappend (pack "HasCustomSqlId: fromPersistValues failed on: "))
-                 (pack $ show x_aYI3))
+                 (pack $ show x_aSaf))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (HasCustomSqlId _name_aYI5) = []
+      persistUniqueKeys (HasCustomSqlId _name_aSah) = []
       persistFieldDef HasCustomSqlIdId
         = (((((((((FieldDef (FieldNameHS (pack "id")))
                     (FieldNameDB (pack "my_id")))
@@ -3255,11 +3103,11 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = HasCustomSqlIdId
       fieldLens HasCustomSqlIdId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYI6) key_aYI7 -> (Entity key_aYI7) value_aYI6)
+            (\ (Entity _ value_aSai) key_aSaj -> (Entity key_aSaj) value_aSai)
       fieldLens HasCustomSqlIdName
         = (lensPTH (hasCustomSqlIdName . entityVal))
-            (\ (Entity key_aYI8 value_aYI9) x_aYIa
-               -> (Entity key_aYI8) value_aYI9 {hasCustomSqlIdName = x_aYIa})
+            (\ (Entity key_aSak value_aSal) x_aSam
+               -> (Entity key_aSak) value_aSal {hasCustomSqlIdName = x_aSam})
     data SharedPrimaryKey
       = SharedPrimaryKey {sharedPrimaryKeyName :: !String}
     type SharedPrimaryKeyId = Key SharedPrimaryKey
@@ -3304,41 +3152,32 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef SharedPrimaryKeyName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (SharedPrimaryKey x_aYIb)
-        = [SomePersistField x_aYIb]
-      fromPersistValues [x1_aYId]
+      toPersistFields (SharedPrimaryKey x_aSan)
+        = [SomePersistField x_aSan]
+      fromPersistValues [x1_aSap]
         = SharedPrimaryKey
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "shared_primary_key")) (pack "name"))
                  . fromPersistValue)
-                x1_aYId
-      fromPersistValues x_aYIc
+                x1_aSap
+      fromPersistValues x_aSao
         = (Left
              $ (mappend
                   (pack "SharedPrimaryKey: fromPersistValues failed on: "))
-                 (pack $ show x_aYIc))
+                 (pack $ show x_aSao))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (SharedPrimaryKey _name_aYIe) = []
+      persistUniqueKeys (SharedPrimaryKey _name_aSaq) = []
       persistFieldDef SharedPrimaryKeyId
         = (((((((((FieldDef (FieldNameHS (pack "id")))
                     (FieldNameDB (pack "id")))
@@ -3367,11 +3206,11 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = SharedPrimaryKeyId
       fieldLens SharedPrimaryKeyId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYIf) key_aYIg -> (Entity key_aYIg) value_aYIf)
+            (\ (Entity _ value_aSar) key_aSas -> (Entity key_aSas) value_aSar)
       fieldLens SharedPrimaryKeyName
         = (lensPTH (sharedPrimaryKeyName . entityVal))
-            (\ (Entity key_aYIh value_aYIi) x_aYIj
-               -> (Entity key_aYIh) value_aYIi {sharedPrimaryKeyName = x_aYIj})
+            (\ (Entity key_aSat value_aSau) x_aSav
+               -> (Entity key_aSat) value_aSau {sharedPrimaryKeyName = x_aSav})
     data SharedPrimaryKeyWithCascade
       = SharedPrimaryKeyWithCascade {sharedPrimaryKeyWithCascadeName :: !String}
     type SharedPrimaryKeyWithCascadeId =
@@ -3420,43 +3259,34 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef SharedPrimaryKeyWithCascadeName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (SharedPrimaryKeyWithCascade x_aYIk)
-        = [SomePersistField x_aYIk]
-      fromPersistValues [x1_aYIm]
+      toPersistFields (SharedPrimaryKeyWithCascade x_aSaw)
+        = [SomePersistField x_aSaw]
+      fromPersistValues [x1_aSay]
         = SharedPrimaryKeyWithCascade
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "shared_primary_key_with_cascade"))
                     (pack "name"))
                  . fromPersistValue)
-                x1_aYIm
-      fromPersistValues x_aYIl
+                x1_aSay
+      fromPersistValues x_aSax
         = (Left
              $ (mappend
                   (pack
                      "SharedPrimaryKeyWithCascade: fromPersistValues failed on: "))
-                 (pack $ show x_aYIl))
+                 (pack $ show x_aSax))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (SharedPrimaryKeyWithCascade _name_aYIn) = []
+      persistUniqueKeys (SharedPrimaryKeyWithCascade _name_aSaz) = []
       persistFieldDef SharedPrimaryKeyWithCascadeId
         = (((((((((FieldDef (FieldNameHS (pack "id")))
                     (FieldNameDB (pack "id")))
@@ -3485,12 +3315,12 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = SharedPrimaryKeyWithCascadeId
       fieldLens SharedPrimaryKeyWithCascadeId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYIo) key_aYIp -> (Entity key_aYIp) value_aYIo)
+            (\ (Entity _ value_aSaA) key_aSaB -> (Entity key_aSaB) value_aSaA)
       fieldLens SharedPrimaryKeyWithCascadeName
         = (lensPTH (sharedPrimaryKeyWithCascadeName . entityVal))
-            (\ (Entity key_aYIq value_aYIr) x_aYIs
-               -> (Entity key_aYIq)
-                    value_aYIr {sharedPrimaryKeyWithCascadeName = x_aYIs})
+            (\ (Entity key_aSaC value_aSaD) x_aSaE
+               -> (Entity key_aSaC)
+                    value_aSaD {sharedPrimaryKeyWithCascadeName = x_aSaE})
     data SharedPrimaryKeyWithCascadeAndCustomName
       = SharedPrimaryKeyWithCascadeAndCustomName {sharedPrimaryKeyWithCascadeAndCustomNameName :: !String}
     type SharedPrimaryKeyWithCascadeAndCustomNameId =
@@ -3542,25 +3372,16 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef SharedPrimaryKeyWithCascadeAndCustomNameName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (SharedPrimaryKeyWithCascadeAndCustomName x_aYIt)
-        = [SomePersistField x_aYIt]
-      fromPersistValues [x1_aYIv]
+      toPersistFields (SharedPrimaryKeyWithCascadeAndCustomName x_aSaF)
+        = [SomePersistField x_aSaF]
+      fromPersistValues [x1_aSaH]
         = SharedPrimaryKeyWithCascadeAndCustomName
             <$>
               (Database.Persist.TH.mapLeft
@@ -3568,19 +3389,19 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
                      (pack "shared_primary_key_with_cascade_and_custom_name"))
                     (pack "name"))
                  . fromPersistValue)
-                x1_aYIv
-      fromPersistValues x_aYIu
+                x1_aSaH
+      fromPersistValues x_aSaG
         = (Left
              $ (mappend
                   (pack
                      "SharedPrimaryKeyWithCascadeAndCustomName: fromPersistValues failed on: "))
-                 (pack $ show x_aYIu))
+                 (pack $ show x_aSaG))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
       persistUniqueKeys
-        (SharedPrimaryKeyWithCascadeAndCustomName _name_aYIw)
+        (SharedPrimaryKeyWithCascadeAndCustomName _name_aSaI)
         = []
       persistFieldDef SharedPrimaryKeyWithCascadeAndCustomNameId
         = (((((((((FieldDef (FieldNameHS (pack "id")))
@@ -3611,13 +3432,13 @@ test/main.hs:(75,1)-(108,2): Splicing declarations
       persistIdField = SharedPrimaryKeyWithCascadeAndCustomNameId
       fieldLens SharedPrimaryKeyWithCascadeAndCustomNameId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aYIx) key_aYIy -> (Entity key_aYIy) value_aYIx)
+            (\ (Entity _ value_aSaJ) key_aSaK -> (Entity key_aSaK) value_aSaJ)
       fieldLens SharedPrimaryKeyWithCascadeAndCustomNameName
         = (lensPTH
              (sharedPrimaryKeyWithCascadeAndCustomNameName . entityVal))
-            (\ (Entity key_aYIz value_aYIA) x_aYIB
-               -> (Entity key_aYIz)
-                    value_aYIA {sharedPrimaryKeyWithCascadeAndCustomNameName = x_aYIB})
+            (\ (Entity key_aSaL value_aSaM) x_aSaN
+               -> (Entity key_aSaL)
+                    value_aSaM {sharedPrimaryKeyWithCascadeAndCustomNameName = x_aSaN})
     instance GHC.TypeLits.TypeError (NoUniqueKeysError HasPrimaryDef) =>
              OnlyOneUniqueKey HasPrimaryDef where
       onlyUniqueP _ = error "impossible"
@@ -4305,76 +4126,43 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [pack "json"])
-                  [(((((((((FieldDef (FieldNameHS (pack "name")))
-                             (FieldNameDB (pack "name")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "age")))
-                             (FieldNameDB (pack "age")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [FieldAttrMaybe])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "address")))
-                             (FieldNameDB (pack "address")))
-                            ((FTTypeCon Nothing) (pack "Laddress")))
-                           SqlString)
-                          [])
-                         True)
-                        (EmbedRef
-                           ((EmbedEntityDef (EntityNameHS (pack "Laddress")))
-                              [((EmbedFieldDef (FieldNameDB (pack "street"))) Nothing) Nothing,
-                               ((EmbedFieldDef (FieldNameDB (pack "city"))) Nothing) Nothing,
-                               ((EmbedFieldDef (FieldNameDB (pack "zip"))) Nothing) Nothing])))
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef LpersonName, persistFieldDef LpersonAge,
+                   persistFieldDef LpersonAddress])
                  [])
                 [])
                [pack "Show", pack "Eq"])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Lperson x_a11Wh x_a11Wi x_a11Wj)
-        = [SomePersistField x_a11Wh, SomePersistField x_a11Wi,
-           SomePersistField x_a11Wj]
-      fromPersistValues [x1_a11Wl, x2_a11Wm, x3_a11Wn]
+      toPersistFields (Lperson x_aViZ x_aVj0 x_aVj1)
+        = [SomePersistField x_aViZ, SomePersistField x_aVj0,
+           SomePersistField x_aVj1]
+      fromPersistValues [x1_aVj3, x2_aVj4, x3_aVj5]
         = Lperson
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "lperson")) (pack "name"))
                  . fromPersistValue)
-                x1_a11Wl
+                x1_aVj3
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "lperson")) (pack "age"))
                  . fromPersistValue)
-                x2_a11Wm
+                x2_aVj4
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "lperson")) (pack "address"))
                  . fromPersistValue)
-                x3_a11Wn
-      fromPersistValues x_a11Wk
+                x3_aVj5
+      fromPersistValues x_aVj2
         = (Left
              $ (mappend (pack "Lperson: fromPersistValues failed on: "))
-                 (pack $ show x_a11Wk))
+                 (pack $ show x_aVj2))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Lperson _name_a11Wo _age_a11Wp _address_a11Wq)
-        = []
+      persistUniqueKeys (Lperson _name_aVj6 _age_aVj7 _address_aVj8) = []
       persistFieldDef LpersonId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -4427,43 +4215,42 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
       persistIdField = LpersonId
       fieldLens LpersonId
         = (lensPTH entityKey)
-            (\ (Entity _ value_a11Wr) key_a11Ws
-               -> (Entity key_a11Ws) value_a11Wr)
+            (\ (Entity _ value_aVj9) key_aVja -> (Entity key_aVja) value_aVj9)
       fieldLens LpersonName
         = (lensPTH (_lpersonName . entityVal))
-            (\ (Entity key_a11Wt value_a11Wu) x_a11Wv
-               -> (Entity key_a11Wt) value_a11Wu {_lpersonName = x_a11Wv})
+            (\ (Entity key_aVjb value_aVjc) x_aVjd
+               -> (Entity key_aVjb) value_aVjc {_lpersonName = x_aVjd})
       fieldLens LpersonAge
         = (lensPTH (_lpersonAge . entityVal))
-            (\ (Entity key_a11Wt value_a11Wu) x_a11Wv
-               -> (Entity key_a11Wt) value_a11Wu {_lpersonAge = x_a11Wv})
+            (\ (Entity key_aVjb value_aVjc) x_aVjd
+               -> (Entity key_aVjb) value_aVjc {_lpersonAge = x_aVjd})
       fieldLens LpersonAddress
         = (lensPTH (_lpersonAddress . entityVal))
-            (\ (Entity key_a11Wt value_a11Wu) x_a11Wv
-               -> (Entity key_a11Wt) value_a11Wu {_lpersonAddress = x_a11Wv})
+            (\ (Entity key_aVjb value_aVjc) x_aVjd
+               -> (Entity key_aVjb) value_aVjc {_lpersonAddress = x_aVjd})
     lpersonName ::
       forall f. Functor f => (Text -> f Text) -> Lperson -> f Lperson
-    lpersonName f_a11Wy a_a11Wz
-      = (fmap setter_a11Wx) (f_a11Wy needle_a11Ww)
+    lpersonName f_aVjg a_aVjh
+      = (fmap setter_aVjf) (f_aVjg needle_aVje)
       where
-          needle_a11Ww = _lpersonName a_a11Wz
-          setter_a11Wx y_a11WA = a_a11Wz {_lpersonName = y_a11WA}
+          needle_aVje = _lpersonName a_aVjh
+          setter_aVjf y_aVji = a_aVjh {_lpersonName = y_aVji}
     lpersonAge ::
       forall f.
       Functor f => (Maybe Int -> f (Maybe Int)) -> Lperson -> f Lperson
-    lpersonAge f_a11WD a_a11WE
-      = (fmap setter_a11WC) (f_a11WD needle_a11WB)
+    lpersonAge f_aVjl a_aVjm
+      = (fmap setter_aVjk) (f_aVjl needle_aVjj)
       where
-          needle_a11WB = _lpersonAge a_a11WE
-          setter_a11WC y_a11WF = a_a11WE {_lpersonAge = y_a11WF}
+          needle_aVjj = _lpersonAge a_aVjm
+          setter_aVjk y_aVjn = a_aVjm {_lpersonAge = y_aVjn}
     lpersonAddress ::
       forall f.
       Functor f => (Laddress -> f Laddress) -> Lperson -> f Lperson
-    lpersonAddress f_a11WI a_a11WJ
-      = (fmap setter_a11WH) (f_a11WI needle_a11WG)
+    lpersonAddress f_aVjq a_aVjr
+      = (fmap setter_aVjp) (f_aVjq needle_aVjo)
       where
-          needle_a11WG = _lpersonAddress a_a11WJ
-          setter_a11WH y_a11WK = a_a11WJ {_lpersonAddress = y_a11WK}
+          needle_aVjo = _lpersonAddress a_aVjr
+          setter_aVjp y_aVjs = a_aVjr {_lpersonAddress = y_aVjs}
     instance ToBackendKey SqlBackend Lperson where
       toBackendKey = unLpersonKey
       fromBackendKey = LpersonKey
@@ -4514,72 +4301,43 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [pack "json"])
-                  [(((((((((FieldDef (FieldNameHS (pack "street")))
-                             (FieldNameDB (pack "street")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "city")))
-                             (FieldNameDB (pack "city")))
-                            ((FTTypeCon Nothing) (pack "Text")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (pack "zip")))
-                             (FieldNameDB (pack "zip")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [FieldAttrMaybe])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef LaddressStreet, persistFieldDef LaddressCity,
+                   persistFieldDef LaddressZip])
                  [])
                 [])
                [pack "Show", pack "Eq"])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Laddress x_a11WL x_a11WM x_a11WN)
-        = [SomePersistField x_a11WL, SomePersistField x_a11WM,
-           SomePersistField x_a11WN]
-      fromPersistValues [x1_a11WP, x2_a11WQ, x3_a11WR]
+      toPersistFields (Laddress x_aVjt x_aVju x_aVjv)
+        = [SomePersistField x_aVjt, SomePersistField x_aVju,
+           SomePersistField x_aVjv]
+      fromPersistValues [x1_aVjx, x2_aVjy, x3_aVjz]
         = Laddress
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "laddress")) (pack "street"))
                  . fromPersistValue)
-                x1_a11WP
+                x1_aVjx
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "laddress")) (pack "city"))
                  . fromPersistValue)
-                x2_a11WQ
+                x2_aVjy
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "laddress")) (pack "zip"))
                  . fromPersistValue)
-                x3_a11WR
-      fromPersistValues x_a11WO
+                x3_aVjz
+      fromPersistValues x_aVjw
         = (Left
              $ (mappend (pack "Laddress: fromPersistValues failed on: "))
-                 (pack $ show x_a11WO))
+                 (pack $ show x_aVjw))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Laddress _street_a11WS _city_a11WT _zip_a11WU)
-        = []
+      persistUniqueKeys (Laddress _street_aVjA _city_aVjB _zip_aVjC) = []
       persistFieldDef LaddressId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -4628,42 +4386,41 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
       persistIdField = LaddressId
       fieldLens LaddressId
         = (lensPTH entityKey)
-            (\ (Entity _ value_a11WV) key_a11WW
-               -> (Entity key_a11WW) value_a11WV)
+            (\ (Entity _ value_aVjD) key_aVjE -> (Entity key_aVjE) value_aVjD)
       fieldLens LaddressStreet
         = (lensPTH (_laddressStreet . entityVal))
-            (\ (Entity key_a11WX value_a11WY) x_a11WZ
-               -> (Entity key_a11WX) value_a11WY {_laddressStreet = x_a11WZ})
+            (\ (Entity key_aVjF value_aVjG) x_aVjH
+               -> (Entity key_aVjF) value_aVjG {_laddressStreet = x_aVjH})
       fieldLens LaddressCity
         = (lensPTH (_laddressCity . entityVal))
-            (\ (Entity key_a11WX value_a11WY) x_a11WZ
-               -> (Entity key_a11WX) value_a11WY {_laddressCity = x_a11WZ})
+            (\ (Entity key_aVjF value_aVjG) x_aVjH
+               -> (Entity key_aVjF) value_aVjG {_laddressCity = x_aVjH})
       fieldLens LaddressZip
         = (lensPTH (_laddressZip . entityVal))
-            (\ (Entity key_a11WX value_a11WY) x_a11WZ
-               -> (Entity key_a11WX) value_a11WY {_laddressZip = x_a11WZ})
+            (\ (Entity key_aVjF value_aVjG) x_aVjH
+               -> (Entity key_aVjF) value_aVjG {_laddressZip = x_aVjH})
     laddressStreet ::
       forall f. Functor f => (Text -> f Text) -> Laddress -> f Laddress
-    laddressStreet f_a11X2 a_a11X3
-      = (fmap setter_a11X1) (f_a11X2 needle_a11X0)
+    laddressStreet f_aVjK a_aVjL
+      = (fmap setter_aVjJ) (f_aVjK needle_aVjI)
       where
-          needle_a11X0 = _laddressStreet a_a11X3
-          setter_a11X1 y_a11X4 = a_a11X3 {_laddressStreet = y_a11X4}
+          needle_aVjI = _laddressStreet a_aVjL
+          setter_aVjJ y_aVjM = a_aVjL {_laddressStreet = y_aVjM}
     laddressCity ::
       forall f. Functor f => (Text -> f Text) -> Laddress -> f Laddress
-    laddressCity f_a11X7 a_a11X8
-      = (fmap setter_a11X6) (f_a11X7 needle_a11X5)
+    laddressCity f_aVjP a_aVjQ
+      = (fmap setter_aVjO) (f_aVjP needle_aVjN)
       where
-          needle_a11X5 = _laddressCity a_a11X8
-          setter_a11X6 y_a11X9 = a_a11X8 {_laddressCity = y_a11X9}
+          needle_aVjN = _laddressCity a_aVjQ
+          setter_aVjO y_aVjR = a_aVjQ {_laddressCity = y_aVjR}
     laddressZip ::
       forall f.
       Functor f => (Maybe Int -> f (Maybe Int)) -> Laddress -> f Laddress
-    laddressZip f_a11Xc a_a11Xd
-      = (fmap setter_a11Xb) (f_a11Xc needle_a11Xa)
+    laddressZip f_aVjU a_aVjV
+      = (fmap setter_aVjT) (f_aVjU needle_aVjS)
       where
-          needle_a11Xa = _laddressZip a_a11Xd
-          setter_a11Xb y_a11Xe = a_a11Xd {_laddressZip = y_a11Xe}
+          needle_aVjS = _laddressZip a_aVjV
+          setter_aVjT y_aVjW = a_aVjV {_laddressZip = y_aVjW}
     instance ToBackendKey SqlBackend Laddress where
       toBackendKey = unLaddressKey
       fromBackendKey = LaddressKey
@@ -4691,21 +4448,21 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
           typ ~ Int => CustomPrimaryKeyAnInt
       keyToValues record
         = [toPersistValue (unCustomPrimaryKeyKey record)]
-      keyFromValues [x1_a11Xk]
+      keyFromValues [x1_aVk2]
         = CustomPrimaryKeyKey
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "custom_primary_key")) (pack "anInt"))
                  . fromPersistValue)
-                x1_a11Xk
-      keyFromValues x_a11Xj
+                x1_aVk2
+      keyFromValues x_aVk1
         = (Left
              $ (mappend (pack "CustomPrimaryKey: keyFromValues failed on: "))
-                 (pack $ show x_a11Xj))
+                 (pack $ show x_aVk1))
       keyFromRecordM
         = Just
-            (\ record_a11Xv
-               -> CustomPrimaryKeyKey (_customPrimaryKeyAnInt record_a11Xv))
+            (\ record_aVkd
+               -> CustomPrimaryKeyKey (_customPrimaryKeyAnInt record_aVkd))
       entityDef _
         = ((((((((((EntityDef (EntityNameHS (pack "CustomPrimaryKey")))
                      (EntityNameDB (pack "custom_primary_key")))
@@ -4732,41 +4489,32 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (pack "anInt")))
-                             (FieldNameDB (pack "an_int")))
-                            ((FTTypeCon Nothing) (pack "Int")))
-                           SqlInt64)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef CustomPrimaryKeyAnInt])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (CustomPrimaryKey x_a11Xf)
-        = [SomePersistField x_a11Xf]
-      fromPersistValues [x1_a11Xh]
+      toPersistFields (CustomPrimaryKey x_aVjX)
+        = [SomePersistField x_aVjX]
+      fromPersistValues [x1_aVjZ]
         = CustomPrimaryKey
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (pack "custom_primary_key")) (pack "anInt"))
                  . fromPersistValue)
-                x1_a11Xh
-      fromPersistValues x_a11Xg
+                x1_aVjZ
+      fromPersistValues x_aVjY
         = (Left
              $ (mappend
                   (pack "CustomPrimaryKey: fromPersistValues failed on: "))
-                 (pack $ show x_a11Xg))
+                 (pack $ show x_aVjY))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (CustomPrimaryKey _anInt_a11Xi) = []
+      persistUniqueKeys (CustomPrimaryKey _anInt_aVk0) = []
       persistFieldDef CustomPrimaryKeyId
         = (((((((((FieldDef (FieldNameHS (pack "Id")))
                     (FieldNameDB (pack "id")))
@@ -4804,47 +4552,45 @@ test/main.hs:(110,1)-(124,2): Splicing declarations
       persistIdField = CustomPrimaryKeyId
       fieldLens CustomPrimaryKeyId
         = (lensPTH entityKey)
-            (\ (Entity _ value_a11Xl) key_a11Xm
-               -> (Entity key_a11Xm) value_a11Xl)
+            (\ (Entity _ value_aVk3) key_aVk4 -> (Entity key_aVk4) value_aVk3)
       fieldLens CustomPrimaryKeyAnInt
         = (lensPTH (_customPrimaryKeyAnInt . entityVal))
-            (\ (Entity key_a11Xn value_a11Xo) x_a11Xp
-               -> (Entity key_a11Xn)
-                    value_a11Xo {_customPrimaryKeyAnInt = x_a11Xp})
+            (\ (Entity key_aVk5 value_aVk6) x_aVk7
+               -> (Entity key_aVk5) value_aVk6 {_customPrimaryKeyAnInt = x_aVk7})
     customPrimaryKeyAnInt ::
       forall f.
       Functor f =>
       (Int -> f Int) -> CustomPrimaryKey -> f CustomPrimaryKey
-    customPrimaryKeyAnInt f_a11Xs a_a11Xt
-      = (fmap setter_a11Xr) (f_a11Xs needle_a11Xq)
+    customPrimaryKeyAnInt f_aVka a_aVkb
+      = (fmap setter_aVk9) (f_aVka needle_aVk8)
       where
-          needle_a11Xq = _customPrimaryKeyAnInt a_a11Xt
-          setter_a11Xr y_a11Xu = a_a11Xt {_customPrimaryKeyAnInt = y_a11Xu}
+          needle_aVk8 = _customPrimaryKeyAnInt a_aVkb
+          setter_aVk9 y_aVkc = a_aVkb {_customPrimaryKeyAnInt = y_aVkc}
     instance ToJSON Lperson where
-      toJSON (Lperson name_a11Xx age_a11Xy address_a11Xz)
+      toJSON (Lperson name_aVkf age_aVkg address_aVkh)
         = object
-            [(pack "name" .= name_a11Xx), (pack "age" .= age_a11Xy),
-             (pack "address" .= address_a11Xz)]
+            [(pack "name" .= name_aVkf), (pack "age" .= age_aVkg),
+             (pack "address" .= address_aVkh)]
     instance FromJSON Lperson where
-      parseJSON (Object obj_a11Xw)
-        = (((pure Lperson <*> (obj_a11Xw .: pack "name"))
-              <*> (obj_a11Xw .:? pack "age"))
-             <*> (obj_a11Xw .: pack "address"))
+      parseJSON (Object obj_aVke)
+        = (((pure Lperson <*> (obj_aVke .: pack "name"))
+              <*> (obj_aVke .:? pack "age"))
+             <*> (obj_aVke .: pack "address"))
       parseJSON _ = GHC.Base.mzero
     instance ToJSON (Entity Lperson) where
       toJSON = entityIdToJSON
     instance FromJSON (Entity Lperson) where
       parseJSON = entityIdFromJSON
     instance ToJSON Laddress where
-      toJSON (Laddress street_a11XB city_a11XC zip_a11XD)
+      toJSON (Laddress street_aVkj city_aVkk zip_aVkl)
         = object
-            [(pack "street" .= street_a11XB), (pack "city" .= city_a11XC),
-             (pack "zip" .= zip_a11XD)]
+            [(pack "street" .= street_aVkj), (pack "city" .= city_aVkk),
+             (pack "zip" .= zip_aVkl)]
     instance FromJSON Laddress where
-      parseJSON (Object obj_a11XA)
-        = (((pure Laddress <*> (obj_a11XA .: pack "street"))
-              <*> (obj_a11XA .: pack "city"))
-             <*> (obj_a11XA .:? pack "zip"))
+      parseJSON (Object obj_aVki)
+        = (((pure Laddress <*> (obj_aVki .: pack "street"))
+              <*> (obj_aVki .: pack "city"))
+             <*> (obj_aVki .:? pack "zip"))
       parseJSON _ = GHC.Base.mzero
     instance ToJSON (Entity Laddress) where
       toJSON = entityIdToJSON

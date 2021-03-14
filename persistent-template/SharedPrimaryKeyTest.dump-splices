@@ -293,39 +293,30 @@ test/SharedPrimaryKeyTest.hs:(25,1)-(39,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
-                             (FieldNameDB (Data.Text.pack "name")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef UserName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (User x_arWZ) = [SomePersistField x_arWZ]
-      fromPersistValues [x1_arX1]
+      toPersistFields (User x_aeq1) = [SomePersistField x_aeq1]
+      fromPersistValues [x1_aeq3]
         = User
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "user")) (Data.Text.pack "name"))
                  . fromPersistValue)
-                x1_arX1
-      fromPersistValues x_arX0
+                x1_aeq3
+      fromPersistValues x_aeq2
         = (Left
              $ (mappend (Data.Text.pack "User: fromPersistValues failed on: "))
-                 (Data.Text.pack $ show x_arX0))
+                 (Data.Text.pack $ show x_aeq2))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (User _name_arX2) = []
+      persistUniqueKeys (User _name_aeq4) = []
       persistFieldDef UserId
         = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
                     (FieldNameDB (Data.Text.pack "id")))
@@ -353,11 +344,11 @@ test/SharedPrimaryKeyTest.hs:(25,1)-(39,2): Splicing declarations
       persistIdField = UserId
       fieldLens UserId
         = (lensPTH entityKey)
-            (\ (Entity _ value_arX3) key_arX4 -> (Entity key_arX4) value_arX3)
+            (\ (Entity _ value_aeq5) key_aeq6 -> (Entity key_aeq6) value_aeq5)
       fieldLens UserName
         = (lensPTH (userName . entityVal))
-            (\ (Entity key_arX5 value_arX6) x_arX7
-               -> (Entity key_arX5) value_arX6 {userName = x_arX7})
+            (\ (Entity key_aeq7 value_aeq8) x_aeq9
+               -> (Entity key_aeq7) value_aeq8 {userName = x_aeq9})
     instance ToBackendKey SqlBackend User where
       toBackendKey = unUserKey
       fromBackendKey = UserKey
@@ -403,40 +394,31 @@ test/SharedPrimaryKeyTest.hs:(25,1)-(39,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "email")))
-                             (FieldNameDB (Data.Text.pack "email")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef ProfileEmail])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Profile x_arX8) = [SomePersistField x_arX8]
-      fromPersistValues [x1_arXa]
+      toPersistFields (Profile x_aeqa) = [SomePersistField x_aeqa]
+      fromPersistValues [x1_aeqc]
         = Profile
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "profile")) (Data.Text.pack "email"))
                  . fromPersistValue)
-                x1_arXa
-      fromPersistValues x_arX9
+                x1_aeqc
+      fromPersistValues x_aeqb
         = (Left
              $ (mappend
                   (Data.Text.pack "Profile: fromPersistValues failed on: "))
-                 (Data.Text.pack $ show x_arX9))
+                 (Data.Text.pack $ show x_aeqb))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Profile _email_arXb) = []
+      persistUniqueKeys (Profile _email_aeqd) = []
       persistFieldDef ProfileId
         = (((((((((FieldDef (FieldNameHS (Data.Text.pack "id")))
                     (FieldNameDB (Data.Text.pack "id")))
@@ -465,11 +447,11 @@ test/SharedPrimaryKeyTest.hs:(25,1)-(39,2): Splicing declarations
       persistIdField = ProfileId
       fieldLens ProfileId
         = (lensPTH entityKey)
-            (\ (Entity _ value_arXc) key_arXd -> (Entity key_arXd) value_arXc)
+            (\ (Entity _ value_aeqe) key_aeqf -> (Entity key_aeqf) value_aeqe)
       fieldLens ProfileEmail
         = (lensPTH (profileEmail . entityVal))
-            (\ (Entity key_arXe value_arXf) x_arXg
-               -> (Entity key_arXe) value_arXf {profileEmail = x_arXg})
+            (\ (Entity key_aeqg value_aeqh) x_aeqi
+               -> (Entity key_aeqg) value_aeqh {profileEmail = x_aeqi})
     instance GHC.TypeLits.TypeError (NoUniqueKeysError User) =>
              OnlyOneUniqueKey User where
       onlyUniqueP _ = error "impossible"

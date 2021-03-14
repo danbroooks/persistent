@@ -534,55 +534,36 @@ test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
-                             (FieldNameDB (Data.Text.pack "name")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
-                             (FieldNameDB (Data.Text.pack "age")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "Int")))
-                           SqlInt64)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef UserName, persistFieldDef UserAge])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (User x_aKqv x_aKqw)
-        = [SomePersistField x_aKqv, SomePersistField x_aKqw]
-      fromPersistValues [x1_aKqy, x2_aKqz]
+      toPersistFields (User x_aCSR x_aCSS)
+        = [SomePersistField x_aCSR, SomePersistField x_aCSS]
+      fromPersistValues [x1_aCSU, x2_aCSV]
         = User
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "User")) (Data.Text.pack "name"))
                  . fromPersistValue)
-                x1_aKqy
+                x1_aCSU
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "User")) (Data.Text.pack "age"))
                  . fromPersistValue)
-                x2_aKqz
-      fromPersistValues x_aKqx
+                x2_aCSV
+      fromPersistValues x_aCST
         = (Left
              $ (mappend (Data.Text.pack "User: fromPersistValues failed on: "))
-                 (Data.Text.pack $ show x_aKqx))
+                 (Data.Text.pack $ show x_aCST))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (User _name_aKqA _age_aKqB) = []
+      persistUniqueKeys (User _name_aCSW _age_aCSX) = []
       persistFieldDef UserId
         = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
                     (FieldNameDB (Data.Text.pack "id")))
@@ -621,15 +602,15 @@ test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
       persistIdField = UserId
       fieldLens UserId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aKqC) key_aKqD -> (Entity key_aKqD) value_aKqC)
+            (\ (Entity _ value_aCSY) key_aCSZ -> (Entity key_aCSZ) value_aCSY)
       fieldLens UserName
         = (lensPTH (userName . entityVal))
-            (\ (Entity key_aKqE value_aKqF) x_aKqG
-               -> (Entity key_aKqE) value_aKqF {userName = x_aKqG})
+            (\ (Entity key_aCT0 value_aCT1) x_aCT2
+               -> (Entity key_aCT0) value_aCT1 {userName = x_aCT2})
       fieldLens UserAge
         = (lensPTH (userAge . entityVal))
-            (\ (Entity key_aKqE value_aKqF) x_aKqG
-               -> (Entity key_aKqE) value_aKqF {userAge = x_aKqG})
+            (\ (Entity key_aCT0 value_aCT1) x_aCT2
+               -> (Entity key_aCT0) value_aCT1 {userAge = x_aCT2})
     instance ToBackendKey SqlBackend User where
       toBackendKey = unUserKey
       fromBackendKey = UserKey
@@ -679,73 +660,43 @@ test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "userId")))
-                             (FieldNameDB (Data.Text.pack "userId")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "UserId")))
-                           (sqlType (Data.Proxy.Proxy :: Data.Proxy.Proxy GHC.Int.Int64)))
-                          [])
-                         True)
-                        ((ForeignRef (EntityNameHS (Data.Text.pack "User")))
-                           ((FTTypeCon (Just (Data.Text.pack "Data.Int")))
-                              (Data.Text.pack "Int64"))))
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
-                             (FieldNameDB (Data.Text.pack "name")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing,
-                   (((((((((FieldDef (FieldNameHS (Data.Text.pack "age")))
-                             (FieldNameDB (Data.Text.pack "age")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "Int")))
-                           SqlInt64)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef DogUserId, persistFieldDef DogName,
+                   persistFieldDef DogAge])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Dog x_aKqH x_aKqI x_aKqJ)
-        = [SomePersistField x_aKqH, SomePersistField x_aKqI,
-           SomePersistField x_aKqJ]
-      fromPersistValues [x1_aKqL, x2_aKqM, x3_aKqN]
+      toPersistFields (Dog x_aCT3 x_aCT4 x_aCT5)
+        = [SomePersistField x_aCT3, SomePersistField x_aCT4,
+           SomePersistField x_aCT5]
+      fromPersistValues [x1_aCT7, x2_aCT8, x3_aCT9]
         = Dog
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "Dog")) (Data.Text.pack "userId"))
                  . fromPersistValue)
-                x1_aKqL
+                x1_aCT7
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "Dog")) (Data.Text.pack "name"))
                  . fromPersistValue)
-                x2_aKqM
+                x2_aCT8
             <*>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "Dog")) (Data.Text.pack "age"))
                  . fromPersistValue)
-                x3_aKqN
-      fromPersistValues x_aKqK
+                x3_aCT9
+      fromPersistValues x_aCT6
         = (Left
              $ (mappend (Data.Text.pack "Dog: fromPersistValues failed on: "))
-                 (Data.Text.pack $ show x_aKqK))
+                 (Data.Text.pack $ show x_aCT6))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Dog _userId_aKqO _name_aKqP _age_aKqQ) = []
+      persistUniqueKeys (Dog _userId_aCTa _name_aCTb _age_aCTc) = []
       persistFieldDef DogId
         = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
                     (FieldNameDB (Data.Text.pack "id")))
@@ -797,19 +748,19 @@ test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
       persistIdField = DogId
       fieldLens DogId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aKqR) key_aKqS -> (Entity key_aKqS) value_aKqR)
+            (\ (Entity _ value_aCTd) key_aCTe -> (Entity key_aCTe) value_aCTd)
       fieldLens DogUserId
         = (lensPTH (dogUserId . entityVal))
-            (\ (Entity key_aKqT value_aKqU) x_aKqV
-               -> (Entity key_aKqT) value_aKqU {dogUserId = x_aKqV})
+            (\ (Entity key_aCTf value_aCTg) x_aCTh
+               -> (Entity key_aCTf) value_aCTg {dogUserId = x_aCTh})
       fieldLens DogName
         = (lensPTH (dogName . entityVal))
-            (\ (Entity key_aKqT value_aKqU) x_aKqV
-               -> (Entity key_aKqT) value_aKqU {dogName = x_aKqV})
+            (\ (Entity key_aCTf value_aCTg) x_aCTh
+               -> (Entity key_aCTf) value_aCTg {dogName = x_aCTh})
       fieldLens DogAge
         = (lensPTH (dogAge . entityVal))
-            (\ (Entity key_aKqT value_aKqU) x_aKqV
-               -> (Entity key_aKqT) value_aKqU {dogAge = x_aKqV})
+            (\ (Entity key_aCTf value_aCTg) x_aCTh
+               -> (Entity key_aCTf) value_aCTg {dogAge = x_aCTh})
     instance ToBackendKey SqlBackend Dog where
       toBackendKey = unDogKey
       fromBackendKey = DogKey
@@ -856,41 +807,32 @@ test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
                         Nothing)
                        Nothing))
                    [])
-                  [(((((((((FieldDef (FieldNameHS (Data.Text.pack "name")))
-                             (FieldNameDB (Data.Text.pack "name")))
-                            ((FTTypeCon Nothing) (Data.Text.pack "String")))
-                           SqlString)
-                          [])
-                         True)
-                        NoReference)
-                       ((FieldCascade Nothing) Nothing))
-                      Nothing)
-                     Nothing])
+                  [persistFieldDef OrganizationName])
                  [])
                 [])
                [])
               (containers-0.6.0.1:Data.Map.Internal.fromList []))
              False)
             Nothing
-      toPersistFields (Organization x_aKqW) = [SomePersistField x_aKqW]
-      fromPersistValues [x1_aKqY]
+      toPersistFields (Organization x_aCTi) = [SomePersistField x_aCTi]
+      fromPersistValues [x1_aCTk]
         = Organization
             <$>
               (Database.Persist.TH.mapLeft
                  ((fieldError (Data.Text.pack "Organization"))
                     (Data.Text.pack "name"))
                  . fromPersistValue)
-                x1_aKqY
-      fromPersistValues x_aKqX
+                x1_aCTk
+      fromPersistValues x_aCTj
         = (Left
              $ (mappend
                   (Data.Text.pack "Organization: fromPersistValues failed on: "))
-                 (Data.Text.pack $ show x_aKqX))
+                 (Data.Text.pack $ show x_aCTj))
       persistUniqueToFieldNames _
         = error "Degenerate case, should never happen"
       persistUniqueToValues _
         = error "Degenerate case, should never happen"
-      persistUniqueKeys (Organization _name_aKqZ) = []
+      persistUniqueKeys (Organization _name_aCTl) = []
       persistFieldDef OrganizationId
         = (((((((((FieldDef (FieldNameHS (Data.Text.pack "Id")))
                     (FieldNameDB (Data.Text.pack "id")))
@@ -918,11 +860,11 @@ test/OverloadedLabelTest.hs:(20,1)-(34,2): Splicing declarations
       persistIdField = OrganizationId
       fieldLens OrganizationId
         = (lensPTH entityKey)
-            (\ (Entity _ value_aKr0) key_aKr1 -> (Entity key_aKr1) value_aKr0)
+            (\ (Entity _ value_aCTm) key_aCTn -> (Entity key_aCTn) value_aCTm)
       fieldLens OrganizationName
         = (lensPTH (organizationName . entityVal))
-            (\ (Entity key_aKr2 value_aKr3) x_aKr4
-               -> (Entity key_aKr2) value_aKr3 {organizationName = x_aKr4})
+            (\ (Entity key_aCTo value_aCTp) x_aCTq
+               -> (Entity key_aCTo) value_aCTp {organizationName = x_aCTq})
     instance ToBackendKey SqlBackend Organization where
       toBackendKey = unOrganizationKey
       fromBackendKey = OrganizationKey
