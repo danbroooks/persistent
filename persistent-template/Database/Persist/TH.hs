@@ -1736,21 +1736,28 @@ makeEntityDefExp entityMap EntityDef{..} =
     |]
 
 liftAndFixKey :: EntityMap -> FieldDef -> Q Exp
-liftAndFixKey entityMap (FieldDef a b c sqlTyp e f fieldRef fc mcomments fg) =
-    [|FieldDef a b c $(sqlTyp') e f (fieldRef') fc mcomments fg|]
+liftAndFixKey entityMap fd@(FieldDef a b c sqlTyp e f fieldRef fc mcomments fg) =
+    [|FieldDef a b c $(sqlTyp') e f fieldRef' fc mcomments fg|]
   where
-    (fieldRef', sqlTyp') =
-        fromMaybe (fieldRef, lift sqlTyp) $
-            case fieldRef of
-                ForeignRef refName _ft ->  do
-                    ent <- M.lookup refName entityMap
-                    case fieldReference $ entityId ent of
-                        fr@(ForeignRef _ ft) ->
-                            Just (fr, lift $ SqlTypeExp ft)
-                        _ ->
-                            Nothing
+      (fieldRef', sqlTyp') =
+          case extractForeignRef entityMap fd of
+            Just (fr, ft) ->
+                (fr, lift (SqlTypeExp ft))
+            Nothing ->
+                (fieldRef, lift sqlTyp)
+
+extractForeignRef :: EntityMap -> FieldDef -> Maybe (ReferenceDef, FieldType)
+extractForeignRef entityMap fieldDef =
+    case fieldReference fieldDef of
+        ForeignRef refName _ft ->  do
+            ent <- M.lookup refName entityMap
+            case fieldReference $ entityId ent of
+                fr@(ForeignRef _ ft) ->
+                    Just (fr, ft)
                 _ ->
                     Nothing
+        _ ->
+            Nothing
 
 deriving instance Lift EntityDef
 
