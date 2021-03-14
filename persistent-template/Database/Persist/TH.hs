@@ -1088,14 +1088,14 @@ headNote = \case
   xs -> error $ "mkKeyFromValues: expected a list of one element, got: " `mappend` show xs
 
 fromValues :: EntityDef -> Text -> Exp -> [FieldDef] -> Q [Clause]
-fromValues t funName conE fields = do
+fromValues entDef funName conE fields = do
     x <- newName "x"
-    let funMsg = entityText t `mappend` ": " `mappend` funName `mappend` " failed on: "
+    let funMsg = entityText entDef `mappend` ": " `mappend` funName `mappend` " failed on: "
     patternMatchFailure <- [|Left $ mappend funMsg (pack $ show $(return $ VarE x))|]
     suc <- patternSuccess
     return [ suc, normalClause [VarP x] patternMatchFailure ]
   where
-    tableName = unEntityNameDB (entityDB t)
+    tableName = unEntityNameDB (entityDB entDef)
     patternSuccess =
         case fields of
             [] -> do
