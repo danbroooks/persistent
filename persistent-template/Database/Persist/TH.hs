@@ -1145,8 +1145,7 @@ mkEntity entityMap mps entDef = do
     fpv <- mkFromPersistValues mps entDef
     utv <- mkUniqueToValues $ entityUniques entDef
     puk <- mkUniqueKeys entDef
-    let primaryField = entityId entDef
-    fields <- mapM (mkField mps entDef) $ primaryField : entityFields entDef
+    fields <- mkFields mps entDef
     fkc <- mapM (mkForeignKeysComposite mps entDef) $ entityForeigns entDef
 
     toFieldNames <- mkToFieldNames $ entityUniques entDef
@@ -1248,6 +1247,11 @@ mkEntity entityMap mps entDef = do
   where
     genDataType = genericDataType mps entName backendT
     entName = entityHaskell entDef
+
+mkFields :: MkPersistSettings -> EntityDef -> Q [(Con, Clause)]
+mkFields mps entDef = do
+    let primaryField = entityId entDef
+    mapM (mkField mps entDef) $ primaryField : entityFields entDef
 
 mkUniqueKeyInstances :: MkPersistSettings -> EntityDef -> Q [Dec]
 mkUniqueKeyInstances mps t = do
