@@ -53,11 +53,12 @@ import Prelude hiding (lines)
 
 import Control.Applicative (Alternative((<|>)))
 import Data.Char (isLower, isSpace, isUpper, toLower)
+import qualified Data.Foldable as F
 import Data.List (find, foldl')
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NEL
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
+import Data.Maybe (fromMaybe, isNothing, listToMaybe, mapMaybe)
 import Data.Monoid (mappend)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -262,6 +263,12 @@ data Line = Line
 lineText :: Line -> NonEmpty Text
 lineText = fmap tokenText . tokens
 
+lineComments :: Line -> [Text]
+lineComments = mapMaybe isDocComment . F.toList . tokens
+
+lineWithoutComments :: Line -> Maybe Line
+lineWithoutComments (Line ind tk) = Line ind <$> NEL.nonEmpty (filter (isNothing . isDocComment) (F.toList tk))
+
 lowestIndent :: NonEmpty Line -> Int
 lowestIndent = minimum . fmap lineIndent
 
@@ -335,11 +342,10 @@ instance Semigroup LinesWithComments where
 appendLwc :: LinesWithComments -> LinesWithComments -> LinesWithComments
 appendLwc = (<>)
 
-newLine :: Line -> LinesWithComments
-newLine l = LinesWithComments (pure l) []
-
-firstLine :: LinesWithComments -> Line
-firstLine = NEL.head . lwcLines
+newLine :: Line -> Maybe LinesWithComments
+newLine l = do
+    withoutComm <- lineWithoutComments l
+    pure $ LinesWithComments (pure withoutComm) (lineComments l)
 
 consLine :: Line -> LinesWithComments -> LinesWithComments
 consLine l lwc = lwc { lwcLines = NEL.cons l (lwcLines lwc) }
@@ -348,42 +354,29 @@ consComment :: Text -> LinesWithComments -> LinesWithComments
 consComment l lwc = lwc { lwcComments = l : lwcComments lwc }
 
 associateLines :: NonEmpty Line -> [LinesWithComments]
-associateLines lines =
-    foldr combine [] $
-    foldr toLinesWithComments [] lines
-  where
-    toLinesWithComments :: Line -> [LinesWithComments] -> [LinesWithComments]
-    toLinesWithComments line linesWithComments =
-        case linesWithComments of
-            [] ->
-                [newLine line]
-            (lwc : lwcs) ->
-                case isDocComment (NEL.head (tokens line)) of
-                    Just comment
-                        | lineIndent line == lowestIndent lines ->
-                        consComment comment lwc : lwcs
-                    _ ->
-                        if lineIndent line <= lineIndent (firstLine lwc)
-                            && lineIndent (firstLine lwc) /= lowestIndent lines
-                        then
-                            consLine line lwc : lwcs
-                        else
-                            newLine line : lwc : lwcs
+associateLines = foldr associateLines' []
 
-    combine :: LinesWithComments -> [LinesWithComments] -> [LinesWithComments]
-    combine lwc [] =
-        [lwc]
-    combine lwc (lwc' : lwcs) =
-        let minIndent = minimumIndentOf lwc
-            otherIndent = minimumIndentOf lwc'
-         in
-            if minIndent < otherIndent then
-                appendLwc lwc lwc' : lwcs
-            else
-                lwc : lwc' : lwcs
+associateLines' :: Line -> [LinesWithComments] -> [LinesWithComments]
+associateLines' next lwcs = fromMaybe (maybe [] pure (newLine next)) $ do
+    lwcs' <- NEL.nonEmpty lwcs
+    pure $ NEL.toList $ expandFirst lwcs' $ \prev ->
+        case newLine next of
+            Just l ->
+                if lowestIndent (lwcLines prev) == 0
+                   then l :| [prev]
+                   else pure $ appendLwc l prev
+            Nothing -> pure $
+                if lineIndent next == 0 then
+                    foldr consComment prev (lineComments next)
+                else
+                    consLine next prev
 
-    minimumIndentOf :: LinesWithComments -> Int
-    minimumIndentOf = lowestIndent . lwcLines
+expandFirst :: NonEmpty a -> (a -> NonEmpty a) -> NonEmpty a
+expandFirst na f = do
+    let res = f (NEL.head na)
+    case NEL.nonEmpty (NEL.tail na) of
+      Nothing -> res
+      Just t -> res <> t
 
 -- | An 'EntityDef' produced by the QuasiQuoter. It contains information that
 -- the QuasiQuoter is capable of knowing about the entities. It is inherently

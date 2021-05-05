@@ -266,7 +266,7 @@ Car
             entityDB (unboundEntityDef vehicle) `shouldBe` EntityNameDB "vehicle"
 
         it "should parse the `entityAttrs` field" $ do
-            entityAttrs (unboundEntityDef bicycle) `shouldBe` ["-- | this is a bike"]
+            entityAttrs (unboundEntityDef bicycle) `shouldBe` []
             entityAttrs (unboundEntityDef car) `shouldBe` []
             entityAttrs (unboundEntityDef vehicle) `shouldBe` []
 
@@ -334,7 +334,7 @@ Notification
             entityDerives (unboundEntityDef vehicle) `shouldBe` []
 
         it "should parse the `entityEntities` field" $ do
-            entityExtra (unboundEntityDef bicycle) `shouldBe` Map.singleton "ExtraBike" [["foo", "bar", "-- | this is a foo bar"], ["baz"]]
+            entityExtra (unboundEntityDef bicycle) `shouldBe` Map.singleton "ExtraBike" [["foo", "bar"], ["baz"]]
             entityExtra (unboundEntityDef car) `shouldBe` mempty
             entityExtra (unboundEntityDef vehicle) `shouldBe` mempty
 
@@ -344,9 +344,28 @@ Notification
             entitySum (unboundEntityDef vehicle) `shouldBe` True
 
         it "should parse the `entityComments` field" $ do
-            entityComments (unboundEntityDef bicycle) `shouldBe` Nothing
+            entityComments (unboundEntityDef bicycle) `shouldBe` Just "this is a bike\nthe brand of the bike\nthis is a foo bar\n"
             entityComments (unboundEntityDef car) `shouldBe` Just "This is a Car\n"
-            entityComments (unboundEntityDef vehicle) `shouldBe` Nothing
+            entityComments (unboundEntityDef vehicle) `shouldBe` Just "the bike reference\nthe car reference\n"
+
+        describe "empty entity with comment" $ do
+            -- PR NOTE: this was an issue I found where:
+            -- EmptyEntity -- | this is an empty entity
+            --   foo Int
+            --
+            -- parses the comment, whereas
+            --
+            -- EmptyEntity -- | this is an empty entity
+            --
+            -- does not, super edge case, but it is corrected :)
+            let [emptyEntity] = parse lowerCaseSettings "EmptyEntity -- | this is an empty entity"
+
+            it "should parse the entity" $ do
+                entityHaskell (unboundEntityDef emptyEntity) `shouldBe` EntityNameHS "EmptyEntity"
+                entityDB (unboundEntityDef emptyEntity) `shouldBe` EntityNameDB "empty_entity"
+
+            it "should parse the comment" $ do
+                entityComments (unboundEntityDef emptyEntity) `shouldBe` Just "this is an empty entity\n"
 
         describe "custom Id column" $ do
             it "parses custom Id column" $ do
@@ -740,7 +759,20 @@ Baz
                     { lineIndent = 0
                     , tokens = pure (DocComment "comment")
                     }
-        it "works" $ do
+
+        it "should return lines when lines with no comments received" $ do
+            associateLines
+                [ foo
+                , name'String
+                ]
+                `shouldBe`
+                    [ LinesWithComments
+                        { lwcComments = []
+                        , lwcLines = foo :| [name'String]
+                        }
+                    ]
+
+        it "separates comments" $ do
             associateLines
                 ( comment :|
                 [ foo
@@ -887,8 +919,6 @@ Baz
                         ["Model"]
                     }
                 ]
-
-
 
     describe "parseLines" $ do
         let lines =
