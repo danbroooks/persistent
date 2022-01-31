@@ -791,11 +791,13 @@ associateComments ps x (!acc, !comments) =
         Just (DocComment comment) ->
             (acc, comment : comments)
         _ ->
-            case (setFieldComments (reverse comments) <$> takeColsEx ps (tokenText <$> x)) of
-              Just sm ->
-                  (sm : acc, [])
-              Nothing ->
-                  (acc, [])
+            case takeColsEx ps (tokenText <$> x) of
+                Left err ->
+                    error err
+                Right (Just sm) ->
+                    (setFieldComments (reverse comments) sm : acc, [])
+                Right Nothing ->
+                    (acc, [])
 
 setFieldComments :: [Text] -> UnboundFieldDef -> UnboundFieldDef
 setFieldComments xs fld =
@@ -851,22 +853,17 @@ isCapitalizedText :: Text -> Bool
 isCapitalizedText t =
     not (T.null t) && isUpper (T.head t)
 
-takeColsEx :: PersistSettings -> [Text] -> Maybe UnboundFieldDef
-takeColsEx =
-    takeCols
-        (\ft perr -> error $ "Invalid field type " ++ show ft ++ " " ++ perr)
-
-takeCols
-    :: (Text -> String -> Maybe UnboundFieldDef)
-    -> PersistSettings
+takeColsEx
+    :: PersistSettings
     -> [Text]
-    -> Maybe UnboundFieldDef
-takeCols _ _ ("deriving":_) = Nothing
-takeCols onErr ps (n':typ:rest')
+    -> Either String (Maybe UnboundFieldDef)
+takeColsEx _ ("deriving":_) = pure Nothing
+takeColsEx ps (n':typ:rest')
     | not (T.null n) && isLower (T.head n) =
         case parseFieldType typ of
-            Left err -> onErr typ err
-            Right ft -> Just UnboundFieldDef
+            Left err ->
+                Left (invalidTypeError typ err)
+            Right ft -> pure $ Just UnboundFieldDef
                 { unboundFieldNameHS =
                     FieldNameHS n
                 , unboundFieldNameDB =
@@ -885,6 +882,10 @@ takeCols onErr ps (n':typ:rest')
                     generated_
                 }
   where
+    invalidTypeError :: Text -> String -> String
+    invalidTypeError ft perr =
+        "Invalid field type \"" ++ T.unpack ft ++ "\" " ++ perr
+
     fieldAttrs_ = parseFieldAttrs attrs_
     generated_ = parseGenerated attrs_
     (cascade_, attrs_) = parseCascade rest'
@@ -892,8 +893,7 @@ takeCols onErr ps (n':typ:rest')
         | Just x <- T.stripPrefix "!" n' = (Just True, x)
         | Just x <- T.stripPrefix "~" n' = (Just False, x)
         | otherwise = (Nothing, n')
-
-takeCols _ _ _ = Nothing
+takeColsEx _ _ = pure Nothing
 
 parseGenerated :: [Text] -> Maybe Text
 parseGenerated = foldl' (\acc x -> acc <|> T.stripPrefix "generated=" x) Nothing
@@ -1092,7 +1092,7 @@ takeComposite fields pkcols =
         }
   where
     (cols, attrs) = break ("!" `T.isPrefixOf`) pkcols
-    getDef [] t = error $ "Unknown column in primary key constraint: " ++ show t
+    getDef [] t = error $ "Unknown column in primary key constraint: " ++ T.unpack t
     getDef (d:ds) t
         | d == FieldNameHS t =
             -- TODO: check for nullability in later step

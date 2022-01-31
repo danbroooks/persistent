@@ -81,10 +81,15 @@ spec = describe "Quasi" $ do
         it "fails on a single word" $ do
             subject ["asdf"]
                 `shouldBe`
-                    Nothing
+                    Right Nothing
+        it "errors on invalid input" $ do
+            subject ["name", "int"]
+                `shouldBe`
+                    Left "Invalid field type \"int\" PSFail ('i',\"nt\")"
+
         it "works if it has a name and a type" $ do
             subject ["asdf", "Int"]
-                `shouldBe`
+                `shouldBe` Right (
                     Just UnboundFieldDef
                         { unboundFieldNameHS = FieldNameHS "asdf"
                         , unboundFieldNameDB = FieldNameDB "asdf"
@@ -95,9 +100,10 @@ spec = describe "Quasi" $ do
                         , unboundFieldComments = Nothing
                         , unboundFieldGenerated = Nothing
                         }
+                    )
         it "works if it has a name, type, and cascade" $ do
             subject ["asdf", "Int", "OnDeleteCascade", "OnUpdateCascade"]
-                `shouldBe`
+                `shouldBe` Right (
                     Just UnboundFieldDef
                         { unboundFieldNameHS = FieldNameHS "asdf"
                         , unboundFieldNameDB = FieldNameDB "asdf"
@@ -108,9 +114,10 @@ spec = describe "Quasi" $ do
                         , unboundFieldComments = Nothing
                         , unboundFieldGenerated = Nothing
                         }
+                    )
         it "never tries to make a refernece" $ do
             subject ["asdf", "UserId", "OnDeleteCascade"]
-                `shouldBe`
+                `shouldBe` Right (
                     Just UnboundFieldDef
                         { unboundFieldNameHS = FieldNameHS "asdf"
                         , unboundFieldNameDB = FieldNameDB "asdf"
@@ -121,6 +128,7 @@ spec = describe "Quasi" $ do
                         , unboundFieldComments = Nothing
                         , unboundFieldGenerated = Nothing
                         }
+                    )
 
     describe "parseLine" $ do
         it "returns nothing when line is just whitespace" $
