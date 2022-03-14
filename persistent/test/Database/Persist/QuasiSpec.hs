@@ -692,6 +692,26 @@ Baz
             entityComments (unboundEntityDef bar) `shouldBe` Nothing
             entityComments (unboundEntityDef foo) `shouldBe` Just "comment\n"
 
+        it "works with field comments" $ do
+            let text =
+                    T.unlines
+                        [ "-- | Model"
+                        , "Foo"
+                        , "  -- | Field a"
+                        , "  name String"
+                        , "  age String -- | Field b"
+                        , "  deleted Bool"
+                        ]
+            let displayFieldWithComments field =
+                    (unboundFieldNameDB field, unboundFieldComments field)
+            let [foo] = parse lowerCaseSettings text
+            entityComments (unboundEntityDef foo) `shouldBe` Just "Model\n"
+            (displayFieldWithComments <$> unboundEntityFields foo) `shouldBe`
+                [ (FieldNameDB "name", Just "Field a\n")
+                , (FieldNameDB "age", Just "Field b\n")
+                , (FieldNameDB "deleted", Nothing)
+                ]
+
         let lines =
                 T.unlines
                     [ "-- | Comment"
