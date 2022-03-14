@@ -24,7 +24,6 @@ module Database.Persist.Quasi.Internal
     , preparse
     , parseLine
     , parseFieldType
-    , associateLines
     , LinesWithComments(..)
     , parseEntityFields
     , takeColsEx
@@ -275,7 +274,7 @@ lowestIndent = minimum . fmap lineIndent
 -- | Divide lines into blocks and make entity definitions.
 parseLines :: PersistSettings -> NonEmpty Line -> [UnboundEntityDef]
 parseLines ps = do
-    fmap (mkUnboundEntityDef ps . toParsedEntityDef) . associateLines
+    fmap (mkUnboundEntityDef ps . toParsedEntityDef) . foldr associateLinesWithComments []
 
 data ParsedEntityDef = ParsedEntityDef
     { parsedEntityDefComments :: [Text]
@@ -353,11 +352,8 @@ consLine l lwc = lwc { lwcLines = NEL.cons l (lwcLines lwc) }
 consComment :: Text -> LinesWithComments -> LinesWithComments
 consComment l lwc = lwc { lwcComments = l : lwcComments lwc }
 
-associateLines :: NonEmpty Line -> [LinesWithComments]
-associateLines = foldr associateLines' []
-
-associateLines' :: Line -> [LinesWithComments] -> [LinesWithComments]
-associateLines' next lwcs = fromMaybe (maybe [] pure (newLine next)) $ do
+associateLinesWithComments :: Line -> [LinesWithComments] -> [LinesWithComments]
+associateLinesWithComments next lwcs = fromMaybe (maybe [] pure (newLine next)) $ do
     lwcs' <- NEL.nonEmpty lwcs
     pure $ NEL.toList $ expandFirst lwcs' $ \prev ->
         case newLine next of

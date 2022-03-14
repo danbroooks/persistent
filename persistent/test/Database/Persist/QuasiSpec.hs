@@ -563,71 +563,6 @@ Baz
         it "preparse works" $ do
             (length <$> preparsed) `shouldBe` Just 10
 
-        let fooLines =
-                [ Line
-                    { lineIndent = 0
-                    , tokens = Token "Foo" :| []
-                    }
-                , Line
-                    { lineIndent = 4
-                    , tokens = Token "name" :| [Token "String"]
-                    }
-                , Line
-                    { lineIndent = 4
-                    , tokens = Token "age" :| [Token "Int"]
-                    }
-                ]
-            emptyLines =
-                [ Line
-                    { lineIndent = 0
-                    , tokens = Token "EmptyEntity" :| []
-                    }
-                ]
-            barLines =
-                [ Line
-                    { lineIndent = 0
-                    , tokens = Token "Bar" :| []
-                    }
-                , Line
-                    { lineIndent = 4
-                    , tokens = Token "name" :| [Token "String"]
-                    }
-                ]
-            bazLines =
-                [ Line
-                    { lineIndent = 0
-                    , tokens = Token "Baz" :| []
-                    }
-                , Line
-                    { lineIndent = 4
-                    , tokens = Token "a" :| [Token "Int"]
-                    }
-                , Line
-                    { lineIndent = 4
-                    , tokens = Token "b" :| [Token "String"]
-                    }
-                , Line
-                    { lineIndent = 4
-                    , tokens = Token "c" :| [Token "FooId"]
-                    }
-                ]
-
-        let
-            linesAssociated =
-                case preparsed of
-                    Nothing -> error "preparsed failed"
-                    Just lines -> associateLines lines
-        it "associateLines works" $ do
-            linesAssociated `shouldMatchList`
-                [ LinesWithComments
-                    { lwcLines = NEL.fromList fooLines
-                    , lwcComments = []
-                    }
-                , LinesWithComments (NEL.fromList emptyLines) []
-                , LinesWithComments (NEL.fromList barLines) []
-                , LinesWithComments (NEL.fromList bazLines) []
-                ]
-
         it "parse works" $ do
             let test name'fieldCount parsedList = do
                     case (name'fieldCount, parsedList) of
@@ -743,184 +678,20 @@ Baz
                     ]
             preparse text `shouldBe` Just expected
 
-    describe "associateLines" $ do
-        let foo =
-                Line
-                    { lineIndent = 0
-                    , tokens = pure (Token "Foo")
-                    }
-            name'String =
-                Line
-                    { lineIndent = 2
-                    , tokens = Token "name" :| [Token "String"]
-                    }
-            comment =
-                Line
-                    { lineIndent = 0
-                    , tokens = pure (DocComment "comment")
-                    }
-
-        it "should return lines when lines with no comments received" $ do
-            associateLines
-                [ foo
-                , name'String
-                ]
-                `shouldBe`
-                    [ LinesWithComments
-                        { lwcComments = []
-                        , lwcLines = foo :| [name'String]
-                        }
-                    ]
-
-        it "separates comments" $ do
-            associateLines
-                ( comment :|
-                [ foo
-                , name'String
-                ])
-                `shouldBe`
-                    [ LinesWithComments
-                        { lwcComments = ["comment"]
-                        , lwcLines = foo :| [name'String]
-                        }
-                    ]
-        let bar =
-                Line
-                    { lineIndent = 0
-                    , tokens = Token "Bar" :| [Token "sql", Token "=", Token "bars"]
-                    }
-            age'Int =
-                Line
-                    { lineIndent = 1
-                    , tokens = Token "age" :| [Token "Int"]
-                    }
-        it "works when used consecutively" $ do
-            associateLines
-                ( bar :|
-                [ age'Int
-                , comment
-                , foo
-                , name'String
-                ])
-                `shouldBe`
-                    [ LinesWithComments
-                        { lwcComments = []
-                        , lwcLines = bar :| [age'Int]
-                        }
-                    , LinesWithComments
-                        { lwcComments = ["comment"]
-                        , lwcLines = foo :| [name'String]
-                        }
-                    ]
-        it "works with textual input" $ do
-            let text = preparse "Foo\n  x X\n-- | Hello\nBar\n name String"
-            associateLines <$> text
-                `shouldBe` Just
-                    [ LinesWithComments
-                        { lwcLines =
-                            Line {lineIndent = 0, tokens = Token "Foo" :| []}
-                            :| [ Line {lineIndent = 2, tokens = Token "x" :| [Token "X"]} ]
-                        , lwcComments =
-                            []
-                        }
-                    , LinesWithComments
-                        { lwcLines =
-                            Line {lineIndent = 0, tokens = Token "Bar" :| []}
-                            :| [ Line {lineIndent = 1, tokens = Token "name" :| [Token "String"]}]
-                        , lwcComments =
-                            ["Hello"]
-                        }
-                    ]
-        it "works with extra blocks" $ do
-            let text = preparse . T.unlines $
-                    [ "LowerCaseTable"
-                    , "    Id             sql=my_id"
-                    , "    fullName Text"
-                    , "    ExtraBlock"
-                    , "        foo bar"
-                    , "        baz"
-                    , "        bin"
-                    , "    ExtraBlock2"
-                    , "        something"
-                    ]
-            associateLines <$> text `shouldBe` Just
-                [ LinesWithComments
-                    { lwcLines =
-                        Line { lineIndent = 0, tokens = pure (Token "LowerCaseTable") } :|
-                        [ Line { lineIndent = 4, tokens = Token "Id" :| [Token "sql=my_id"] }
-                        , Line { lineIndent = 4, tokens = Token "fullName" :| [Token "Text"] }
-                        , Line { lineIndent = 4, tokens = pure (Token "ExtraBlock") }
-                        , Line { lineIndent = 8, tokens = Token "foo" :| [Token "bar"] }
-                        , Line { lineIndent = 8, tokens = pure (Token "baz") }
-                        , Line { lineIndent = 8, tokens = pure (Token "bin") }
-                        , Line { lineIndent = 4, tokens = pure (Token "ExtraBlock2") }
-                        , Line { lineIndent = 8, tokens = pure (Token "something") }
-                        ]
-                    , lwcComments = []
-                    }
-                ]
-
-        it "works with extra blocks twice" $ do
-            let text = preparse . T.unlines $
-                    [ "IdTable"
-                    , "    Id Day default=CURRENT_DATE"
-                    , "    name Text"
-                    , ""
-                    , "LowerCaseTable"
-                    , "    Id             sql=my_id"
-                    , "    fullName Text"
-                    , "    ExtraBlock"
-                    , "        foo bar"
-                    , "        baz"
-                    , "        bin"
-                    , "    ExtraBlock2"
-                    , "        something"
-                    ]
-            associateLines <$> text `shouldBe` Just
-                [ LinesWithComments
-                    { lwcLines = Line 0 (pure (Token "IdTable")) :|
-                        [ Line 4 (Token "Id" <| Token "Day" :| [Token "default=CURRENT_DATE"])
-                        , Line 4 (Token "name" :| [Token "Text"])
-                        ]
-                    , lwcComments = []
-                    }
-                , LinesWithComments
-                    { lwcLines =
-                        Line { lineIndent = 0, tokens = pure (Token "LowerCaseTable") } :|
-                        [ Line { lineIndent = 4, tokens = Token "Id" :| [Token "sql=my_id"] }
-                        , Line { lineIndent = 4, tokens = Token "fullName" :| [Token "Text"] }
-                        , Line { lineIndent = 4, tokens = pure (Token "ExtraBlock") }
-                        , Line { lineIndent = 8, tokens = Token "foo" :| [Token "bar"] }
-                        , Line { lineIndent = 8, tokens = pure (Token "baz") }
-                        , Line { lineIndent = 8, tokens = pure (Token "bin") }
-                        , Line { lineIndent = 4, tokens = pure (Token "ExtraBlock2") }
-                        , Line { lineIndent = 8, tokens = pure (Token "something") }
-                        ]
-                    , lwcComments = []
-                    }
-                ]
-
-
-        it "works with field comments" $ do
-            let text = preparse . T.unlines $
-                    [ "-- | Model"
-                    , "Foo"
-                    , "  -- | Field"
-                    , "  name String"
-                    ]
-            associateLines <$> text `shouldBe` Just
-                [ LinesWithComments
-                    { lwcLines =
-                        Line { lineIndent = 0, tokens = (Token "Foo") :| [] } :|
-                            [ Line { lineIndent = 2, tokens = pure (DocComment "Field") }
-                            , Line { lineIndent = 2, tokens = Token "name" :| [Token "String"] }
-                            ]
-                    , lwcComments =
-                        ["Model"]
-                    }
-                ]
-
     describe "parseLines" $ do
+        it "parses comments from consecutive entities" $ do
+            let text =
+                    T.unlines
+                        [ "Bar sql=bars"
+                        , "  age Int"
+                        , "-- | comment"
+                        , "Foo"
+                        , "  name String"
+                        ]
+            let [bar, foo] = parse lowerCaseSettings text
+            entityComments (unboundEntityDef bar) `shouldBe` Nothing
+            entityComments (unboundEntityDef foo) `shouldBe` Just "comment\n"
+
         let lines =
                 T.unlines
                     [ "-- | Comment"
