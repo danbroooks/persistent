@@ -79,11 +79,11 @@ spec = describe "Quasi" $ do
     describe "takeColsEx" $ do
         let subject = takeColsEx upperCaseSettings
         it "fails on a single word" $ do
-            subject ["asdf"]
+            subject [Token "asdf"]
                 `shouldBe`
                     Nothing
         it "works if it has a name and a type" $ do
-            subject ["asdf", "Int"]
+            subject [Token "asdf", Token "Int"]
                 `shouldBe`
                     Just UnboundFieldDef
                         { unboundFieldNameHS = FieldNameHS "asdf"
@@ -96,7 +96,7 @@ spec = describe "Quasi" $ do
                         , unboundFieldGenerated = Nothing
                         }
         it "works if it has a name, type, and cascade" $ do
-            subject ["asdf", "Int", "OnDeleteCascade", "OnUpdateCascade"]
+            subject [Token "asdf", Token "Int", Token "OnDeleteCascade", Token "OnUpdateCascade"]
                 `shouldBe`
                     Just UnboundFieldDef
                         { unboundFieldNameHS = FieldNameHS "asdf"
@@ -109,7 +109,7 @@ spec = describe "Quasi" $ do
                         , unboundFieldGenerated = Nothing
                         }
         it "never tries to make a refernece" $ do
-            subject ["asdf", "UserId", "OnDeleteCascade"]
+            subject [Token "asdf", Token "UserId", Token "OnDeleteCascade"]
                 `shouldBe`
                     Just UnboundFieldDef
                         { unboundFieldNameHS = FieldNameHS "asdf"
