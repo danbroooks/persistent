@@ -256,14 +256,14 @@ tokenize t
 -- | A line of parsed tokens
 data Line = Line
     { lineIndent   :: Int
-    , tokens       :: NonEmpty Token
+    , lineTokens   :: NonEmpty Token
     } deriving (Eq, Show)
 
 lineText :: Line -> NonEmpty Text
-lineText = fmap tokenText . tokens
+lineText = fmap tokenText . lineTokens
 
 lineComments :: Line -> [Text]
-lineComments = mapMaybe isDocComment . F.toList . tokens
+lineComments = mapMaybe isDocComment . F.toList . lineTokens
 
 lineWithoutComments :: Line -> Maybe Line
 lineWithoutComments (Line ind tk) = Line ind <$> NEL.nonEmpty (filter (isNothing . isDocComment) (F.toList tk))
@@ -828,7 +828,7 @@ parseEntityFields lns =
     case lns of
         [] -> ([], M.empty)
         (line : rest) ->
-            case NEL.toList (tokens line) of
+            case NEL.toList (lineTokens line) of
                 [Token name]
                   | isCapitalizedText name ->
                     let (children, rest') = span ((> lineIndent line) . lineIndent) rest

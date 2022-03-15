@@ -607,20 +607,20 @@ Baz
 
         it "recognizes entity" $ do
             let expected =
-                    Line { lineIndent = 0, tokens = pure (Token "Person") } :|
-                    [ Line { lineIndent = 2, tokens = Token "name" :| [Token "String"] }
-                    , Line { lineIndent = 2, tokens = Token "age" :| [Token "Int"] }
+                    Line { lineIndent = 0, lineTokens = pure (Token "Person") } :|
+                    [ Line { lineIndent = 2, lineTokens = Token "name" :| [Token "String"] }
+                    , Line { lineIndent = 2, lineTokens = Token "age" :| [Token "Int"] }
                     ]
             preparse "Person\n  name String\n  age Int" `shouldBe` Just expected
 
         it "recognizes comments" $ do
             let text = "Foo\n  x X\n-- | Hello\nBar\n name String"
             let expected =
-                    Line { lineIndent = 0, tokens = pure (Token "Foo") } :|
-                    [ Line { lineIndent = 2, tokens = Token "x" :| [Token "X"] }
-                    , Line { lineIndent = 0, tokens = pure (DocComment "Hello") }
-                    , Line { lineIndent = 0, tokens = pure (Token "Bar") }
-                    , Line { lineIndent = 1, tokens = Token "name" :| [Token "String"] }
+                    Line { lineIndent = 0, lineTokens = pure (Token "Foo") } :|
+                    [ Line { lineIndent = 2, lineTokens = Token "x" :| [Token "X"] }
+                    , Line { lineIndent = 0, lineTokens = pure (DocComment "Hello") }
+                    , Line { lineIndent = 0, lineTokens = pure (Token "Bar") }
+                    , Line { lineIndent = 1, lineTokens = Token "name" :| [Token "String"] }
                     ]
             preparse text `shouldBe` Just expected
 
@@ -634,11 +634,11 @@ Baz
                     , "    name String"
                     ]
                 expected =
-                    Line { lineIndent = 2, tokens = pure (Token "Foo") } :|
-                    [ Line { lineIndent = 4, tokens = Token "x" :| [Token "X"] }
-                    , Line { lineIndent = 2, tokens = pure (DocComment "Comment") }
-                    , Line { lineIndent = 2, tokens = pure (Token "Bar") }
-                    , Line { lineIndent = 4, tokens = Token "name" :| [Token "String"] }
+                    Line { lineIndent = 2, lineTokens = pure (Token "Foo") } :|
+                    [ Line { lineIndent = 4, lineTokens = Token "x" :| [Token "X"] }
+                    , Line { lineIndent = 2, lineTokens = pure (DocComment "Comment") }
+                    , Line { lineIndent = 2, lineTokens = pure (Token "Bar") }
+                    , Line { lineIndent = 4, lineTokens = Token "name" :| [Token "String"] }
                     ]
             preparse t `shouldBe` Just expected
 
@@ -653,13 +653,13 @@ Baz
                     , "    something"
                     ]
                 expected =
-                    Line { lineIndent = 0, tokens = pure (Token "LowerCaseTable") } :|
-                    [ Line { lineIndent = 2, tokens = Token "name" :| [Token "String"] }
-                    , Line { lineIndent = 2, tokens = pure (Token "ExtraBlock") }
-                    , Line { lineIndent = 4, tokens = Token "foo" :| [Token "bar"] }
-                    , Line { lineIndent = 4, tokens = pure (Token "baz") }
-                    , Line { lineIndent = 2, tokens = pure (Token "ExtraBlock2") }
-                    , Line { lineIndent = 4, tokens = pure (Token "something") }
+                    Line { lineIndent = 0, lineTokens = pure (Token "LowerCaseTable") } :|
+                    [ Line { lineIndent = 2, lineTokens = Token "name" :| [Token "String"] }
+                    , Line { lineIndent = 2, lineTokens = pure (Token "ExtraBlock") }
+                    , Line { lineIndent = 4, lineTokens = Token "foo" :| [Token "bar"] }
+                    , Line { lineIndent = 4, lineTokens = pure (Token "baz") }
+                    , Line { lineIndent = 2, lineTokens = pure (Token "ExtraBlock2") }
+                    , Line { lineIndent = 4, lineTokens = pure (Token "something") }
                     ]
             preparse t `shouldBe` Just expected
 
@@ -671,10 +671,10 @@ Baz
                     , "  name String"
                     ]
                 expected =
-                    Line { lineIndent = 0, tokens = [DocComment "Model"] } :|
-                    [ Line { lineIndent = 0, tokens = [Token "Foo"] }
-                    , Line { lineIndent = 2, tokens = [DocComment "Field"] }
-                    , Line { lineIndent = 2, tokens = (Token <$> ["name", "String"]) }
+                    Line { lineIndent = 0, lineTokens = [DocComment "Model"] } :|
+                    [ Line { lineIndent = 0, lineTokens = [Token "Foo"] }
+                    , Line { lineIndent = 2, lineTokens = [DocComment "Field"] }
+                    , Line { lineIndent = 2, lineTokens = (Token <$> ["name", "String"]) }
                     ]
             preparse text `shouldBe` Just expected
 
