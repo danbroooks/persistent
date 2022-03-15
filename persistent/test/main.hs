@@ -10,7 +10,7 @@ import qualified Database.Persist.THSpec as THSpec
 main :: IO ()
 main = hspec $ do
     describe "Database" $ describe "Persist" $ do
-        THSpec.spec
         QuasiSpec.spec
         ClassSpec.spec
         PersistValueSpec.spec
+        THSpec.spec

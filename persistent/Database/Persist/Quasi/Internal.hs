@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE RankNTypes #-}
@@ -24,8 +23,8 @@ module Database.Persist.Quasi.Internal
     , preparse
     , parseLine
     , parseFieldType
+    , collectLinesWithComments
     , LinesWithComments(..)
-    , parseEntityFields
     , takeColsEx
     -- * UnboundEntityDef
     , UnboundEntityDef(..)
@@ -51,13 +50,14 @@ module Database.Persist.Quasi.Internal
 import Prelude hiding (lines)
 
 import Control.Applicative (Alternative((<|>)))
+import Control.Monad (guard)
 import Data.Char (isLower, isSpace, isUpper, toLower)
 import qualified Data.Foldable as F
 import Data.List (find, foldl')
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NEL
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe, isNothing, listToMaybe, mapMaybe)
+import Data.Maybe
 import Data.Monoid (mappend)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -178,19 +178,32 @@ preparse txt = do
     NEL.nonEmpty $ mapMaybe parseLine (NEL.toList lns)
 
 parseLine :: Text -> Maybe Line
-parseLine txt = do
-    Line (parseIndentationAmount txt) <$> NEL.nonEmpty (tokenize txt)
+parseLine txtInput = do
+    let (txt, comment) = parseDocComment txtInput
+        toks = tokenize txt
+    guard (not (null toks) || not (null comment))
+    pure $ Line
+        { lineIndent = parseIndentationAmount txt
+        , lineTokens = tokenize txt
+        , lineComments = F.toList comment
+        }
+
+parseDocComment :: Text -> (Text, Maybe Text)
+parseDocComment t =
+    if T.null comment
+        then (toks, Nothing)
+        else (toks, Just (T.drop 5 comment))
+  where
+    (toks, comment) = T.breakOn "-- | " t
 
 -- | A token used by the parser.
 data Token = Token Text    -- ^ @Token tok@ is token @tok@ already unquoted.
-           | DocComment Text -- ^ @DocComment@ is a documentation comment, unmodified.
   deriving (Show, Eq)
 
 tokenText :: Token -> Text
 tokenText tok =
     case tok of
         Token t -> t
-        DocComment t -> "-- | " <> t
 
 parseIndentationAmount :: Text -> Int
 parseIndentationAmount txt =
@@ -201,7 +214,6 @@ parseIndentationAmount txt =
 tokenize :: Text -> [Token]
 tokenize t
     | T.null t = []
-    | Just txt <- T.stripPrefix "-- | " t = [DocComment txt]
     | "--" `T.isPrefixOf` t = [] -- Comment until the end of the line.
     | "#" `T.isPrefixOf` t = [] -- Also comment to the end of the line, needed for a CPP bug (#110)
     | T.head t == '"' = quotes (T.tail t) id
@@ -256,17 +268,18 @@ tokenize t
 -- | A line of parsed tokens
 data Line = Line
     { lineIndent   :: Int
-    , lineTokens   :: NonEmpty Token
+    , lineTokens :: [Token]
+    , lineComments :: [Text]
     } deriving (Eq, Show)
 
-lineText :: Line -> NonEmpty Text
+lineText :: Line -> [Text]
 lineText = fmap tokenText . lineTokens
 
-lineComments :: Line -> [Text]
-lineComments = mapMaybe isDocComment . F.toList . lineTokens
-
-lineWithoutComments :: Line -> Maybe Line
-lineWithoutComments (Line ind tk) = Line ind <$> NEL.nonEmpty (filter (isNothing . isDocComment) (F.toList tk))
+lineWithoutComments :: Line -> Maybe (Line, [Text])
+lineWithoutComments l = do
+    toks <- NEL.nonEmpty (lineTokens l)
+    let line = l { lineTokens = F.toList toks, lineComments = [] }
+    pure (line, lineComments l)
 
 lowestIndent :: NonEmpty Line -> Int
 lowestIndent = minimum . fmap lineIndent
@@ -274,14 +287,33 @@ lowestIndent = minimum . fmap lineIndent
 -- | Divide lines into blocks and make entity definitions.
 parseLines :: PersistSettings -> NonEmpty Line -> [UnboundEntityDef]
 parseLines ps = do
-    fmap (mkUnboundEntityDef ps . toParsedEntityDef) . foldr associateLinesWithComments []
+    mapMaybe (fmap (mkUnboundEntityDef ps) . toParsedEntityDef) . collectLinesWithComments
+
+collectLinesWithComments :: NonEmpty Line -> [LinesWithComments]
+collectLinesWithComments =
+    foldr associateLinesWithComments []
+
+data ParsedEntityAttribute
+    = ParsedEntityAttributeField ParsedField
+    | ParsedEntityAttributeDeriving [Text]
+    | ParsedEntityAttributeConstraint (NonEmpty Text)
+
+data ParsedField = ParsedField
+    { parsedFieldName :: Text
+    , parsedFieldType :: Text
+    , parsedFieldAttributes :: [FieldAttr]
+    , parsedFieldGenerated :: Maybe Text
+    , parsedFieldCascade :: FieldCascade
+    , parsedFieldComments :: [Text]
+    , parsedFieldStrictness :: Maybe Bool
+    }
 
 data ParsedEntityDef = ParsedEntityDef
     { parsedEntityDefComments :: [Text]
     , parsedEntityDefEntityName :: EntityNameHS
     , parsedEntityDefIsSum :: Bool
     , parsedEntityDefEntityAttributes :: [Attr]
-    , parsedEntityDefFieldAttributes :: [[Token]]
+    , parsedEntityDefFieldAttributes :: [ParsedEntityAttribute]
     , parsedEntityDefExtras :: M.Map Text [ExtraLine]
     }
 
@@ -294,35 +326,31 @@ entityNamesFromParsedDef ps parsedEntDef = (entNameHS, entNameDB)
     entNameDB =
         EntityNameDB $ getDbName ps (unEntityNameHS entNameHS) (parsedEntityDefEntityAttributes parsedEntDef)
 
-toParsedEntityDef :: LinesWithComments -> ParsedEntityDef
-toParsedEntityDef lwc = ParsedEntityDef
-    { parsedEntityDefComments = lwcComments lwc
-    , parsedEntityDefEntityName = entNameHS
-    , parsedEntityDefIsSum = isSum
-    , parsedEntityDefEntityAttributes = entAttribs
-    , parsedEntityDefFieldAttributes = attribs
-    , parsedEntityDefExtras = extras
-    }
+toParsedEntityDef :: LinesWithComments -> Maybe ParsedEntityDef
+toParsedEntityDef lwc =
+    case lineText entityLine of
+        (entityName : entAttribs) ->
+            let (isSum, entNameHS) =
+                    case T.uncons entityName of
+                        Just ('+', x) -> (True, EntityNameHS x)
+                        _ -> (False, EntityNameHS entityName)
+             in Just $ ParsedEntityDef
+                { parsedEntityDefComments =
+                    lineComments entityLine
+                , parsedEntityDefEntityName = entNameHS
+                , parsedEntityDefIsSum = isSum
+                , parsedEntityDefEntityAttributes = entAttribs
+                , parsedEntityDefFieldAttributes = attribs
+                , parsedEntityDefExtras = extras
+                }
+        _ ->
+            Nothing
   where
     entityLine :| fieldLines =
         lwcLines lwc
 
-    (entityName :| entAttribs) =
-        lineText entityLine
-
-    (isSum, entNameHS) =
-        case T.uncons entityName of
-            Just ('+', x) -> (True, EntityNameHS x)
-            _ -> (False, EntityNameHS entityName)
-
     (attribs, extras) =
         parseEntityFields fieldLines
-
-isDocComment :: Token -> Maybe Text
-isDocComment tok =
-    case tok of
-        DocComment txt -> Just txt
-        _ -> Nothing
 
 data LinesWithComments = LinesWithComments
     { lwcLines :: NonEmpty Line
@@ -341,38 +369,79 @@ instance Semigroup LinesWithComments where
 appendLwc :: LinesWithComments -> LinesWithComments -> LinesWithComments
 appendLwc = (<>)
 
-newLine :: Line -> Maybe LinesWithComments
-newLine l = do
-    withoutComm <- lineWithoutComments l
-    pure $ LinesWithComments (pure withoutComm) (lineComments l)
+newLine :: Line -> LinesWithComments
+newLine l =
+    case lineWithoutComments l of
+      Just (ln, comm) ->
+          LinesWithComments (pure ln) (F.toList comm)
+      _ ->
+          lineSingleton l
+
+lineSingleton :: Line -> LinesWithComments
+lineSingleton l =
+    LinesWithComments (pure l) mempty
 
 consLine :: Line -> LinesWithComments -> LinesWithComments
 consLine l lwc = lwc { lwcLines = NEL.cons l (lwcLines lwc) }
 
-consComment :: Text -> LinesWithComments -> LinesWithComments
-consComment l lwc = lwc { lwcComments = l : lwcComments lwc }
+consComment :: [Text] -> LinesWithComments -> LinesWithComments
+consComment cs lwc = lwc
+    { lwcLines =
+        updateFirst (lwcLines lwc) $ \l -> l
+            { lineComments = cs <> lineComments l
+            }
+    }
 
 associateLinesWithComments :: Line -> [LinesWithComments] -> [LinesWithComments]
-associateLinesWithComments next lwcs = fromMaybe (maybe [] pure (newLine next)) $ do
-    lwcs' <- NEL.nonEmpty lwcs
-    pure $ NEL.toList $ expandFirst lwcs' $ \prev ->
-        case newLine next of
-            Just l ->
-                if lowestIndent (lwcLines prev) == 0
-                   then l :| [prev]
-                   else pure $ appendLwc l prev
-            Nothing -> pure $
-                if lineIndent next == 0 then
-                    foldr consComment prev (lineComments next)
-                else
-                    consLine next prev
+associateLinesWithComments next lwcs = do
+    case lineTokens next of
+        [] ->
+            case (lineComments next, NEL.nonEmpty lwcs) of
+                (c : cs, Just (prev :| rest)) -> consComment (c : cs) prev : rest
+                _ -> []
+        _ ->
+            case NEL.nonEmpty lwcs of
+                Nothing ->
+                    lineSingleton next : lwcs
+                Just (curr :| rest) ->
+                    if lowestIndent (lwcLines curr) == 0
+                       then lineSingleton next : lwcs
+                       else consLine next curr : rest
 
+                               {-
+    case NEL.nonEmpty lwcs of
+        Nothing ->
+                _ ->
+                    pure $ if lineIndent next == 0
+                       then newLine next
+                       else lineSingleton next
+        Just prevLines ->
+            NEL.toList $ expandFirst prevLines $ \prev ->
+                case lineTokens next of
+                    [] ->
+                        pure $ lineSingleton next
+                    _ ->
+                        pure $ appendLwc (lineSingleton next) prev
+
+                        if lowestIndent (lwcLines prev) == 0
+                           then l :| [prev]
+                           else pure $ appendLwc l prev
+                    Nothing -> pure $
+                        if lineIndent next == 0 then
+                            foldr consComment prev (lineComments next)
+                        else
+                            consLine next prev
+        -}
 expandFirst :: NonEmpty a -> (a -> NonEmpty a) -> NonEmpty a
 expandFirst na f = do
     let res = f (NEL.head na)
     case NEL.nonEmpty (NEL.tail na) of
       Nothing -> res
       Just t -> res <> t
+
+updateFirst :: NonEmpty a -> (a -> a) -> NonEmpty a
+updateFirst na f =
+    expandFirst na (pure . f)
 
 -- | An 'EntityDef' produced by the QuasiQuoter. It contains information that
 -- the QuasiQuoter is capable of knowing about the entities. It is inherently
@@ -657,7 +726,7 @@ mkUnboundEntityDef ps parsedEntDef =
                     []
                 , entityUniques = entityConstraintDefsUniquesList entityConstraintDefs
                 , entityForeigns = []
-                , entityDerives = concat $ mapMaybe takeDerives textAttribs
+                , entityDerives = concat $ mapMaybe takeDerives fields
                 , entityExtra = parsedEntityDefExtras parsedEntDef
                 , entitySum = parsedEntityDefIsSum parsedEntDef
                 , entityComments =
@@ -670,15 +739,20 @@ mkUnboundEntityDef ps parsedEntDef =
     (entNameHS, entNameDB) =
         entityNamesFromParsedDef ps parsedEntDef
 
-    attribs =
+    fields =
         parsedEntityDefFieldAttributes parsedEntDef
 
-    textAttribs :: [[Text]]
-    textAttribs =
-        fmap tokenText <$> attribs
+    fieldConstraints :: [NonEmpty Text]
+    fieldConstraints = catMaybes $ do
+        fld <- fields
+        pure $ case fld of
+            ParsedEntityAttributeConstraint constraint ->
+                Just constraint
+            _ ->
+                Nothing
 
     entityConstraintDefs =
-        foldMap (maybe mempty (takeConstraint ps entNameHS cols) . NEL.nonEmpty) textAttribs
+        foldMap (takeConstraint ps entNameHS cols) fieldConstraints
 
     idField =
         case entityConstraintDefsIdField entityConstraintDefs of
@@ -693,7 +767,7 @@ mkUnboundEntityDef ps parsedEntDef =
             NotSet -> Nothing
 
     cols :: [UnboundFieldDef]
-    cols = reverse . fst . foldr (associateComments ps) ([], []) $ reverse attribs
+    cols = mapMaybe (either error id . takeColsEx ps) fields
 
     autoIdField :: FieldDef
     autoIdField =
@@ -770,6 +844,7 @@ unbindIdDef entityName fd =
             Just $ fieldType fd
         }
 
+    {-
 associateComments
     :: PersistSettings
     -> [Token]
@@ -777,8 +852,8 @@ associateComments
     -> ([UnboundFieldDef], [Text])
 associateComments ps x (!acc, !comments) =
     case listToMaybe x of
-        Just (DocComment comment) ->
-            (acc, comment : comments)
+        -- Just (DocComment comment) ->
+        --    (acc, comment : comments)
         _ ->
             case takeColsEx ps (tokenText <$> x) of
                 Left err ->
@@ -793,7 +868,7 @@ setFieldComments xs fld =
     case xs of
         [] -> fld
         _ -> fld { unboundFieldComments = Just (T.unlines xs) }
-
+-}
 mkAutoIdField :: PersistSettings -> EntityNameHS -> SqlType -> FieldDef
 mkAutoIdField ps =
     mkAutoIdField' (FieldNameDB $ psIdName ps)
@@ -823,20 +898,47 @@ keyConName entName = unEntityNameHS entName `mappend` "Id"
 
 parseEntityFields
     :: [Line]
-    -> ([[Token]], M.Map Text [ExtraLine])
+    -> ([ParsedEntityAttribute], M.Map Text [ExtraLine])
 parseEntityFields lns =
     case lns of
         [] -> ([], M.empty)
         (line : rest) ->
-            case NEL.toList (lineTokens line) of
+            case lineTokens line of
                 [Token name]
                   | isCapitalizedText name ->
                     let (children, rest') = span ((> lineIndent line) . lineIndent) rest
                         (x, y) = parseEntityFields rest'
-                     in (x, M.insert name (NEL.toList . lineText <$> children) y)
-                ts ->
+                     in (x, M.insert name (lineText <$> children) y)
+                _ ->
                     let (x, y) = parseEntityFields rest
-                     in (ts:x, y)
+                     in case parseEntityFieldAttribute line of
+                          Just field -> (field : x, y)
+                          _ -> (x, y)
+    where
+        parseEntityFieldAttribute :: Line -> Maybe ParsedEntityAttribute
+        parseEntityFieldAttribute line =
+            case lineText line of
+                "deriving" : derives ->
+                    Just $ ParsedEntityAttributeDeriving derives
+                (n : rest) | isCapitalizedText n ->
+                    Just $ ParsedEntityAttributeConstraint (n :| rest)
+                (name' : typ : attrs_) ->
+                    let (cascade, attrs) = parseCascade attrs_
+                        (mstrict, name)
+                            | Just x <- T.stripPrefix "!" name' = (Just True, x)
+                            | Just x <- T.stripPrefix "~" name' = (Just False, x)
+                            | otherwise = (Nothing, name')
+                     in Just $ ParsedEntityAttributeField $ ParsedField
+                         { parsedFieldName = name
+                         , parsedFieldType = typ
+                         , parsedFieldAttributes = parseFieldAttrs attrs
+                         , parsedFieldGenerated = parseGenerated attrs
+                         , parsedFieldCascade = cascade
+                         , parsedFieldComments = lineComments line
+                         , parsedFieldStrictness = mstrict
+                         }
+                _ ->
+                    Nothing
 
 isCapitalizedText :: Text -> Bool
 isCapitalizedText t =
@@ -844,45 +946,43 @@ isCapitalizedText t =
 
 takeColsEx
     :: PersistSettings
-    -> [Text]
+    -> ParsedEntityAttribute
     -> Either String (Maybe UnboundFieldDef)
-takeColsEx _ ("deriving":_) = pure Nothing
-takeColsEx ps (n':typ:rest')
-    | not (T.null n) && isLower (T.head n) =
-        case parseFieldType typ of
-            Left err ->
-                Left (invalidTypeError typ err)
-            Right ft -> pure $ Just UnboundFieldDef
-                { unboundFieldNameHS =
-                    FieldNameHS n
-                , unboundFieldNameDB =
-                    getDbName' ps n fieldAttrs_
-                , unboundFieldType =
-                    ft
-                , unboundFieldAttrs =
-                    fieldAttrs_
-                , unboundFieldStrict =
-                    fromMaybe (psStrictFields ps) mstrict
-                , unboundFieldComments =
-                    Nothing
-                , unboundFieldCascade =
-                    cascade_
-                , unboundFieldGenerated =
-                    generated_
-                }
+takeColsEx ps field =
+    case field of
+        ParsedEntityAttributeField field -> do
+            let typ = parsedFieldType field
+            case parseFieldType typ of
+                Left err ->
+                    Left (invalidTypeError typ err)
+                Right ft -> pure $ Just UnboundFieldDef
+                    { unboundFieldNameHS =
+                        FieldNameHS (parsedFieldName field)
+                    , unboundFieldNameDB =
+                        getDbName' ps field
+                    , unboundFieldType =
+                        ft
+                    , unboundFieldAttrs =
+                        parsedFieldAttributes field
+                    , unboundFieldStrict =
+                        fromMaybe (psStrictFields ps) (parsedFieldStrictness field)
+                    , unboundFieldComments =
+                        case parsedFieldComments field of
+                            [] ->
+                                Nothing
+                            comments ->
+                                Just (T.unlines comments)
+                    , unboundFieldCascade =
+                        parsedFieldCascade field
+                    , unboundFieldGenerated =
+                        parsedFieldGenerated field
+                    }
+        _ ->
+            pure Nothing
   where
     invalidTypeError :: Text -> String -> String
     invalidTypeError ft perr =
         "Invalid field type \"" ++ T.unpack ft ++ "\" " ++ perr
-
-    fieldAttrs_ = parseFieldAttrs attrs_
-    generated_ = parseGenerated attrs_
-    (cascade_, attrs_) = parseCascade rest'
-    (mstrict, n)
-        | Just x <- T.stripPrefix "!" n' = (Just True, x)
-        | Just x <- T.stripPrefix "~" n' = (Just False, x)
-        | otherwise = (Nothing, n')
-takeColsEx _ _ = pure Nothing
 
 parseGenerated :: [Text] -> Maybe Text
 parseGenerated = foldl' (\acc x -> acc <|> T.stripPrefix "generated=" x) Nothing
@@ -891,9 +991,9 @@ getDbName :: PersistSettings -> Text -> [Text] -> Text
 getDbName ps n =
     fromMaybe (psToDBName ps n) . listToMaybe . mapMaybe (T.stripPrefix "sql=")
 
-getDbName' :: PersistSettings -> Text -> [FieldAttr] -> FieldNameDB
-getDbName' ps n =
-    getSqlNameOr (FieldNameDB $ psToDBName ps n)
+getDbName' :: PersistSettings -> ParsedField -> FieldNameDB
+getDbName' ps field =
+    getSqlNameOr (FieldNameDB $ psToDBName ps (parsedFieldName field)) (parsedFieldAttributes field)
 
 getSqlNameOr
     :: FieldNameDB
@@ -1412,8 +1512,8 @@ parseCascadeAction prfx text = do
             CascadeUpdate -> "Update"
             CascadeDelete -> "Delete"
 
-takeDerives :: [Text] -> Maybe [Text]
-takeDerives ("deriving":rest) = Just rest
+takeDerives :: ParsedEntityAttribute -> Maybe [Text]
+takeDerives (ParsedEntityAttributeDeriving derives) = Just derives
 takeDerives _ = Nothing
 
 -- | Returns 'True' if the 'UnboundFieldDef' does not have a 'MigrationOnly' or

@@ -24,112 +24,6 @@ import Text.Shakespeare.Text (st)
 
 spec :: Spec
 spec = describe "Quasi" $ do
-    describe "parseEntityFields" $ do
-        let helloWorldTokens = Token "hello" :| [Token "world"]
-            foobarbazTokens = Token "foo" :| [Token "bar", Token "baz"]
-        it "works" $ do
-            parseEntityFields []
-                `shouldBe`
-                    mempty
-        it "works2" $ do
-            parseEntityFields
-                [ Line 0 helloWorldTokens
-                ]
-                `shouldBe`
-                    ( [NEL.toList helloWorldTokens], mempty )
-        it "works3" $ do
-            parseEntityFields
-                [ Line 0 helloWorldTokens
-                , Line 2 foobarbazTokens
-                ]
-                `shouldBe`
-                    ( [NEL.toList helloWorldTokens, NEL.toList foobarbazTokens], mempty )
-        it "works4" $ do
-            parseEntityFields
-                [ Line 0 [Token "Product"]
-                , Line 2 (Token <$> ["name", "Text"])
-                , Line 2 (Token <$> ["added", "UTCTime", "default=CURRENT_TIMESTAMP"])
-                ]
-                `shouldBe`
-                    ( []
-                    , Map.fromList
-                        [ ("Product",
-                            [ ["name", "Text"]
-                            , ["added", "UTCTime", "default=CURRENT_TIMESTAMP"]
-                            ]
-                        ) ]
-                    )
-        it "works5" $ do
-            parseEntityFields
-                [ Line 0 [Token "Product"]
-                , Line 2 (Token <$> ["name", "Text"])
-                , Line 4 [Token "ExtraBlock"]
-                , Line 4 (Token <$> ["added", "UTCTime", "default=CURRENT_TIMESTAMP"])
-                ]
-                `shouldBe`
-                    ( []
-                    , Map.fromList
-                        [ ("Product",
-                            [ ["name", "Text"]
-                            , ["ExtraBlock"]
-                            , ["added", "UTCTime", "default=CURRENT_TIMESTAMP"]
-                            ]
-                        )]
-                    )
-    describe "takeColsEx" $ do
-        let subject = takeColsEx upperCaseSettings
-        it "fails on a single word" $ do
-            subject ["asdf"]
-                `shouldBe`
-                    Right Nothing
-        it "errors on invalid input" $ do
-            subject ["name", "int"]
-                `shouldBe`
-                    Left "Invalid field type \"int\" PSFail ('i',\"nt\")"
-
-        it "works if it has a name and a type" $ do
-            subject ["asdf", "Int"]
-                `shouldBe` Right (
-                    Just UnboundFieldDef
-                        { unboundFieldNameHS = FieldNameHS "asdf"
-                        , unboundFieldNameDB = FieldNameDB "asdf"
-                        , unboundFieldType = FTTypeCon Nothing "Int"
-                        , unboundFieldAttrs = []
-                        , unboundFieldStrict = True
-                        , unboundFieldCascade = noCascade
-                        , unboundFieldComments = Nothing
-                        , unboundFieldGenerated = Nothing
-                        }
-                    )
-        it "works if it has a name, type, and cascade" $ do
-            subject ["asdf", "Int", "OnDeleteCascade", "OnUpdateCascade"]
-                `shouldBe` Right (
-                    Just UnboundFieldDef
-                        { unboundFieldNameHS = FieldNameHS "asdf"
-                        , unboundFieldNameDB = FieldNameDB "asdf"
-                        , unboundFieldType = FTTypeCon Nothing "Int"
-                        , unboundFieldAttrs = []
-                        , unboundFieldStrict = True
-                        , unboundFieldCascade = FieldCascade (Just Cascade) (Just Cascade)
-                        , unboundFieldComments = Nothing
-                        , unboundFieldGenerated = Nothing
-                        }
-                    )
-        it "never tries to make a refernece" $ do
-            subject ["asdf", "UserId", "OnDeleteCascade"]
-                `shouldBe` Right (
-                    Just UnboundFieldDef
-                        { unboundFieldNameHS = FieldNameHS "asdf"
-                        , unboundFieldNameDB = FieldNameDB "asdf"
-                        , unboundFieldType = FTTypeCon Nothing "UserId"
-                        , unboundFieldAttrs = []
-                        , unboundFieldStrict = True
-                        , unboundFieldCascade = FieldCascade Nothing (Just Cascade)
-                        , unboundFieldComments = Nothing
-                        , unboundFieldGenerated = Nothing
-                        }
-                    )
-
     describe "parseLine" $ do
         it "returns nothing when line is just whitespace" $
             parseLine "         " `shouldBe` Nothing
@@ -137,99 +31,334 @@ spec = describe "Quasi" $ do
         it "handles normal words" $
             parseLine " foo   bar  baz" `shouldBe`
                 Just
-                    ( Line 1
-                        [ Token "foo"
-                        , Token "bar"
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 1
+                        , lineTokens =
+                            [ Token "foo"
+                            , Token "bar"
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "handles quotes" $
             parseLine "  \"foo bar\"  \"baz\"" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "foo bar"
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "foo bar"
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "handles quotes mid-token" $
             parseLine "  x=\"foo bar\"  \"baz\"" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "x=foo bar"
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "x=foo bar"
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "handles escaped quote mid-token" $
             parseLine "  x=\\\"foo bar\"  \"baz\"" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "x=\\\"foo"
-                        , Token "bar\""
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "x=\\\"foo"
+                            , Token "bar\""
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "handles unnested parantheses" $
             parseLine "  (foo bar)  (baz)" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "foo bar"
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "foo bar"
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "handles unnested parantheses mid-token" $
             parseLine "  x=(foo bar)  (baz)" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "x=foo bar"
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "x=foo bar"
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "handles nested parantheses" $
             parseLine "  (foo (bar))  (baz)" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "foo (bar)"
-                        , Token "baz"
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "foo (bar)"
+                            , Token "baz"
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "escaping" $
             parseLine "  (foo \\(bar)  y=\"baz\\\"\"" `shouldBe`
                 Just
-                    ( Line 2
-                        [ Token "foo (bar"
-                        , Token "y=baz\""
-                        ]
+                    ( Line
+                        { lineIndent = 2
+                        , lineTokens =
+                            [ Token "foo (bar"
+                            , Token "y=baz\""
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         it "mid-token quote in later token" $
             parseLine "foo bar baz=(bin\")" `shouldBe`
                 Just
-                    ( Line 0
-                        [ Token "foo"
-                        , Token "bar"
-                        , Token "baz=bin\""
-                        ]
+                    ( Line
+                        { lineIndent = 0
+                        , lineTokens =
+                            [ Token "foo"
+                            , Token "bar"
+                            , Token "baz=bin\""
+                            ]
+                        , lineComments =
+                            mempty
+                        }
                     )
 
         describe "comments" $ do
             it "recognizes one line" $ do
                 parseLine "-- | this is a comment" `shouldBe`
                     Just
-                        ( Line 0
-                            [ DocComment "this is a comment"
-                            ]
+                        ( Line
+                            { lineIndent = 0
+                            , lineTokens = []
+                            , lineComments = pure "this is a comment"
+                            }
                         )
 
             it "works if comment is indented" $ do
                 parseLine "  -- | comment" `shouldBe`
-                    Just (Line 2 [DocComment "comment"])
+                    Just
+                        ( Line
+                            { lineIndent = 2
+                            , lineTokens = []
+                            , lineComments = pure "comment"
+                            }
+                        )
+
+    describe "collectLinesWithComments" $ do
+        let doCollect =
+                fmap collectLinesWithComments . preparse
+
+        it "comment" $ do
+            let subject =
+                    [st|
+-- | this is a bike
+                    |]
+
+            doCollect subject `shouldBe` Just []
+
+        it "a" $ do
+            let subject =
+                    [st|
+Bicycle -- | this is a bike
+                    |]
+
+            doCollect subject `shouldBe`
+                ( Just
+                    [ LinesWithComments
+                        { lwcLines = Line {lineIndent = 0, lineTokens = [Token "Bicycle"], lineComments = pure "this is a bike" } :| []
+                        , lwcComments = []
+                        }
+                    ]
+                )
+
+        it "a2" $ do
+            let subject =
+                    [st|
+-- | this is a bike
+Bicycle
+                    |]
+
+            doCollect subject `shouldBe`
+                ( Just
+                    [ LinesWithComments
+                        { lwcLines = Line {lineIndent = 0, lineTokens = [Token "Bicycle"], lineComments = pure "this is a bike" } :| []
+                        , lwcComments = []
+                        }
+                    ]
+                )
+        it "b" $ do
+            let subject =
+                    [st|
+Bicycle -- | this is a bike
+    brand String -- | the brand of the bike
+    ExtraBike
+        foo bar  -- | this is a foo bar
+        baz
+    deriving Eq
+-- | This is a Car
+                    |]
+
+            doCollect subject `shouldBe`
+                ( Just
+                    [ LinesWithComments
+                        { lwcLines =
+                            Line {lineIndent = 0, lineTokens = [Token "Bicycle"], lineComments = pure "this is a bike" } :|
+                            [ Line {lineIndent = 4, lineTokens = [Token "brand",Token "String"], lineComments = pure "the brand of the bike"}
+                            , Line {lineIndent = 4, lineTokens = [Token "ExtraBike"], lineComments = mempty}
+                            , Line {lineIndent = 8, lineTokens = [Token "foo",Token "bar"], lineComments = pure "this is a foo bar"}
+                            , Line {lineIndent = 8, lineTokens = [Token "baz"], lineComments = mempty}
+                            , Line {lineIndent = 4, lineTokens = [Token "deriving",Token "Eq"], lineComments = mempty}
+                            ]
+                        , lwcComments = []
+                        }
+                    ]
+                )
+
+        it "c" $ do
+            let subject =
+                    [st|
+-- | This is a Car
+Car
+    -- | the make of the Car
+    make String
+    -- | the model of the Car
+    model String -- | (model)
+    UniqueModel model
+    deriving Eq Show
+                    |]
+
+            doCollect subject `shouldBe`
+                ( Just
+                    [ LinesWithComments
+                        { lwcLines =
+                            Line {lineIndent = 0, lineTokens = [Token "Car"], lineComments = pure "This is a Car"} :|
+                            [ Line {lineIndent = 4, lineTokens = [Token "make",Token "String"], lineComments = pure "the make of the Car"}
+                            , Line {lineIndent = 4, lineTokens = [Token "model",Token "String"], lineComments = ["the model of the Car", "(model)"]}
+                            , Line {lineIndent = 4, lineTokens = [Token "UniqueModel",Token "model"], lineComments = mempty}
+                            , Line {lineIndent = 4, lineTokens = [Token "deriving",Token "Eq",Token "Show"], lineComments = mempty}
+                            ]
+                        , lwcComments = []
+                        }
+                    ]
+                )
+
+        it "d" $ do
+            let subject =
+                    [st|
+-- | Doc comments work.
+-- | Has multiple lines.
+CommentModel
+    -- | First line name.
+    -- | Second line name.
+    name String
+
+    deriving Eq Show
+    |]
+            doCollect subject `shouldBe`
+                ( Just
+                    [ LinesWithComments
+                        { lwcLines =
+                            Line {lineIndent = 0, lineTokens = [Token "CommentModel"], lineComments = ["Doc comments work.", "Has multiple lines."] } :|
+                            [ Line {lineIndent = 4, lineTokens = [Token "name", Token "String"], lineComments = ["First line name.", "Second line name."]}
+                            , Line {lineIndent = 4, lineTokens = [Token "deriving",Token "Eq",Token "Show"], lineComments = mempty}
+                            ]
+                        , lwcComments =
+                           []
+                        }
+                    ]
+                )
+
+
+
+        it "big test" $ do
+            let subject =
+                    [st|
+Bicycle -- | this is a bike
+    brand String -- | the brand of the bike
+    ExtraBike
+        foo bar  -- | this is a foo bar
+        baz
+    deriving Eq
+-- | This is a Car
+Car
+    -- | the make of the Car
+    make String
+    -- | the model of the Car
+    model String
+    UniqueModel model
+    deriving Eq Show
++Vehicle
+    bicycle BicycleId -- | the bike reference
+    car CarId         -- | the car reference
+                    |]
+
+            doCollect subject `shouldBe`
+                ( Just
+                    [ LinesWithComments
+                        { lwcLines =
+                            Line {lineIndent = 0, lineTokens = [Token "Bicycle"], lineComments = pure "this is a bike" } :|
+                            [ Line {lineIndent = 4, lineTokens = [Token "brand",Token "String"], lineComments = pure "the brand of the bike"}
+                            , Line {lineIndent = 4, lineTokens = [Token "ExtraBike"], lineComments = mempty}
+                            , Line {lineIndent = 8, lineTokens = [Token "foo",Token "bar"], lineComments = pure "this is a foo bar"}
+                            , Line {lineIndent = 8, lineTokens = [Token "baz"], lineComments = mempty}
+                            , Line {lineIndent = 4, lineTokens = [Token "deriving",Token "Eq"], lineComments = mempty}
+                            ]
+                        , lwcComments = []
+                        }
+                    , LinesWithComments
+                        { lwcLines =
+                            Line {lineIndent = 0, lineTokens = [Token "Car"], lineComments = pure "This is a Car" } :|
+                            [ Line {lineIndent = 4, lineTokens = [Token "make",Token "String"], lineComments = pure "the make of the Car"}
+                            , Line {lineIndent = 4, lineTokens = [Token "model",Token "String"], lineComments = pure "the model of the Car"}
+                            , Line {lineIndent = 4, lineTokens = [Token "UniqueModel",Token "model"], lineComments = mempty}
+                            , Line {lineIndent = 4, lineTokens = [Token "deriving",Token "Eq",Token "Show"], lineComments = mempty}
+                            ]
+                        , lwcComments = []
+                        }
+                    , LinesWithComments
+                        { lwcLines =
+                            Line {lineIndent = 0, lineTokens = [Token "+Vehicle"], lineComments = mempty} :|
+                            [ Line {lineIndent = 4, lineTokens = [Token "bicycle",Token "BicycleId"], lineComments = pure "the bike reference"}
+                            , Line {lineIndent = 4, lineTokens = [Token "car",Token "CarId"], lineComments = pure "the car reference"}
+                            ]
+                        , lwcComments = []
+                        }
+                    ]
+                )
 
     describe "parse" $ do
         let subject =
@@ -274,15 +403,15 @@ Car
             let simplifyField field =
                     (unboundFieldNameHS field, unboundFieldNameDB field, unboundFieldComments field)
             (simplifyField <$> unboundEntityFields bicycle) `shouldBe`
-                [ (FieldNameHS "brand", FieldNameDB "brand", Nothing)
+                [ (FieldNameHS "brand", FieldNameDB "brand", Just "the brand of the bike\n")
                 ]
             (simplifyField <$> unboundEntityFields car) `shouldBe`
                 [ (FieldNameHS "make", FieldNameDB "make", Just "the make of the Car\n")
                 , (FieldNameHS "model", FieldNameDB "model", Just "the model of the Car\n")
                 ]
             (simplifyField <$> unboundEntityFields vehicle) `shouldBe`
-                [ (FieldNameHS "bicycle", FieldNameDB "bicycle", Nothing)
-                , (FieldNameHS "car", FieldNameDB "car", Nothing)
+                [ (FieldNameHS "bicycle", FieldNameDB "bicycle", Just "the bike reference\n")
+                , (FieldNameHS "car", FieldNameDB "car", Just "the car reference\n")
                 ]
 
         it "should parse the `entityUniques` field" $ do
@@ -344,9 +473,9 @@ Notification
             entitySum (unboundEntityDef vehicle) `shouldBe` True
 
         it "should parse the `entityComments` field" $ do
-            entityComments (unboundEntityDef bicycle) `shouldBe` Just "this is a bike\nthe brand of the bike\nthis is a foo bar\n"
+            entityComments (unboundEntityDef bicycle) `shouldBe` Just "this is a bike\n"
             entityComments (unboundEntityDef car) `shouldBe` Just "This is a Car\n"
-            entityComments (unboundEntityDef vehicle) `shouldBe` Just "the bike reference\nthe car reference\n"
+            entityComments (unboundEntityDef vehicle) `shouldBe` Nothing
 
         describe "empty entity with comment" $ do
             -- PR NOTE: this was an issue I found where:
@@ -607,20 +736,20 @@ Baz
 
         it "recognizes entity" $ do
             let expected =
-                    Line { lineIndent = 0, lineTokens = pure (Token "Person") } :|
-                    [ Line { lineIndent = 2, lineTokens = Token "name" :| [Token "String"] }
-                    , Line { lineIndent = 2, lineTokens = Token "age" :| [Token "Int"] }
+                    Line { lineIndent = 0, lineTokens = pure (Token "Person"), lineComments = mempty } :|
+                    [ Line { lineIndent = 2, lineTokens = Token "name" : [Token "String"], lineComments = mempty }
+                    , Line { lineIndent = 2, lineTokens = Token "age" : [Token "Int"], lineComments = mempty }
                     ]
             preparse "Person\n  name String\n  age Int" `shouldBe` Just expected
 
         it "recognizes comments" $ do
             let text = "Foo\n  x X\n-- | Hello\nBar\n name String"
             let expected =
-                    Line { lineIndent = 0, lineTokens = pure (Token "Foo") } :|
-                    [ Line { lineIndent = 2, lineTokens = Token "x" :| [Token "X"] }
-                    , Line { lineIndent = 0, lineTokens = pure (DocComment "Hello") }
-                    , Line { lineIndent = 0, lineTokens = pure (Token "Bar") }
-                    , Line { lineIndent = 1, lineTokens = Token "name" :| [Token "String"] }
+                    Line { lineIndent = 0, lineTokens = pure (Token "Foo"), lineComments = mempty } :|
+                    [ Line { lineIndent = 2, lineTokens = Token "x" : [Token "X"], lineComments = mempty }
+                    , Line { lineIndent = 0, lineTokens = [], lineComments = pure "Hello" }
+                    , Line { lineIndent = 0, lineTokens = pure (Token "Bar"), lineComments = mempty }
+                    , Line { lineIndent = 1, lineTokens = Token "name" : [Token "String"], lineComments = mempty }
                     ]
             preparse text `shouldBe` Just expected
 
@@ -634,11 +763,11 @@ Baz
                     , "    name String"
                     ]
                 expected =
-                    Line { lineIndent = 2, lineTokens = pure (Token "Foo") } :|
-                    [ Line { lineIndent = 4, lineTokens = Token "x" :| [Token "X"] }
-                    , Line { lineIndent = 2, lineTokens = pure (DocComment "Comment") }
-                    , Line { lineIndent = 2, lineTokens = pure (Token "Bar") }
-                    , Line { lineIndent = 4, lineTokens = Token "name" :| [Token "String"] }
+                    Line { lineIndent = 2, lineTokens = pure (Token "Foo"), lineComments = mempty } :|
+                    [ Line { lineIndent = 4, lineTokens = Token "x" : [Token "X"], lineComments = mempty }
+                    , Line { lineIndent = 2, lineTokens = [], lineComments = pure "Comment" }
+                    , Line { lineIndent = 2, lineTokens = pure (Token "Bar"), lineComments = mempty }
+                    , Line { lineIndent = 4, lineTokens = Token "name" : [Token "String"], lineComments = mempty }
                     ]
             preparse t `shouldBe` Just expected
 
@@ -653,13 +782,13 @@ Baz
                     , "    something"
                     ]
                 expected =
-                    Line { lineIndent = 0, lineTokens = pure (Token "LowerCaseTable") } :|
-                    [ Line { lineIndent = 2, lineTokens = Token "name" :| [Token "String"] }
-                    , Line { lineIndent = 2, lineTokens = pure (Token "ExtraBlock") }
-                    , Line { lineIndent = 4, lineTokens = Token "foo" :| [Token "bar"] }
-                    , Line { lineIndent = 4, lineTokens = pure (Token "baz") }
-                    , Line { lineIndent = 2, lineTokens = pure (Token "ExtraBlock2") }
-                    , Line { lineIndent = 4, lineTokens = pure (Token "something") }
+                    Line { lineIndent = 0, lineTokens = pure (Token "LowerCaseTable"), lineComments = mempty } :|
+                    [ Line { lineIndent = 2, lineTokens = Token "name" : [Token "String"], lineComments = mempty }
+                    , Line { lineIndent = 2, lineTokens = pure (Token "ExtraBlock"), lineComments = mempty }
+                    , Line { lineIndent = 4, lineTokens = Token "foo" : [Token "bar"], lineComments = mempty }
+                    , Line { lineIndent = 4, lineTokens = pure (Token "baz"), lineComments = mempty }
+                    , Line { lineIndent = 2, lineTokens = pure (Token "ExtraBlock2"), lineComments = mempty }
+                    , Line { lineIndent = 4, lineTokens = pure (Token "something"), lineComments = mempty }
                     ]
             preparse t `shouldBe` Just expected
 
@@ -671,10 +800,10 @@ Baz
                     , "  name String"
                     ]
                 expected =
-                    Line { lineIndent = 0, lineTokens = [DocComment "Model"] } :|
-                    [ Line { lineIndent = 0, lineTokens = [Token "Foo"] }
-                    , Line { lineIndent = 2, lineTokens = [DocComment "Field"] }
-                    , Line { lineIndent = 2, lineTokens = (Token <$> ["name", "String"]) }
+                    Line { lineIndent = 0, lineTokens = [], lineComments = pure "Model" } :|
+                    [ Line { lineIndent = 0, lineTokens = [Token "Foo"], lineComments = mempty }
+                    , Line { lineIndent = 2, lineTokens = [], lineComments = pure "Field" }
+                    , Line { lineIndent = 2, lineTokens = (Token <$> ["name", "String"]), lineComments = mempty }
                     ]
             preparse text `shouldBe` Just expected
 
