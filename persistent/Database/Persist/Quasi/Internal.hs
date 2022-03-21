@@ -47,6 +47,17 @@ module Database.Persist.Quasi.Internal
     , ForeignFieldReference(..)
     , mkKeyConType
     , isHaskellUnboundField
+
+    -- tmp
+    , parseParens
+    , parseQuotes
+    , Parser
+    , runParser
+    , satisfy
+    , char
+    , anything
+    , whileChar
+    , enclosed
     ) where
 
 import Prelude hiding (lines)
@@ -58,7 +69,6 @@ import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NEL
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
-import Data.Monoid (mappend)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Database.Persist.EntityDef.Internal
@@ -66,56 +76,167 @@ import Database.Persist.Types
 import Language.Haskell.TH.Syntax (Lift)
 import Text.Read (readEither)
 
-data ParseState a = PSDone | PSFail String | PSSuccess a Text deriving Show
+newtype Parser a = Parser
+    { runParser :: Text -> Either Text (a, Text)
+    }
 
-parseFieldType :: Text -> Either String FieldType
-parseFieldType t0 =
-    case parseApplyFT t0 of
-        PSSuccess ft t'
-            | T.all isSpace t' -> Right ft
-        PSFail err -> Left $ "PSFail " ++ err
-        other -> Left $ show other
+runParserFinal :: Parser a -> Text -> Either Text a
+runParserFinal p t =
+    fst <$> runParser p t
+
+parseError :: (Text -> Text) -> Parser a
+parseError msg = Parser (Left . msg)
+
+instance Functor Parser where
+    fmap f p = do
+        a <- p
+        pure (f a)
+
+instance Applicative Parser where
+    pure =
+        return
+
+    Parser f <*> Parser p =
+        Parser $ \input -> do
+            (f', next) <- f input
+            (output, rest) <- p next
+            pure (f' output, rest)
+
+instance Monad Parser where
+    return a =
+        Parser $ \input ->
+            return (a, input)
+
+    Parser p >>= k =
+        Parser $ \input -> do
+            (output, rest) <- p input
+            runParser (k output) rest
+
+currentChar :: Parser (Maybe Char)
+currentChar = Parser $ \input -> do
+    let current = fst <$> T.uncons input
+    pure (current, input)
+
+satisfy :: (Char -> Bool) -> Parser Char
+satisfy p = Parser $ \input ->
+    case T.uncons input of
+        Nothing ->
+            Left "out of input"
+        Just (ch, rest) ->
+            if p ch
+               then pure (ch, rest)
+               else Left $ "satisfy: unexpected '" <> T.singleton ch <> "' in '" <> input <> "'"
+
+char :: Char -> Parser Char
+char ch = satisfy (== ch)
+
+anyChar :: Parser Char
+anyChar = satisfy (const True)
+
+anything :: Parser Text
+anything =
+    Parser $ \a ->
+        pure (a, "")
+
+whileChar :: (Char -> Bool) -> Parser Text
+whileChar p = do
+    h <- satisfy p
+    t <- fromMaybe "" <$> untilFail (whileChar p)
+    pure $ T.cons h t
+
+eof :: Parser ()
+eof = Parser $ \input ->
+    case T.uncons input of
+        Nothing -> pure ((), "")
+        _ -> Left "Expected end of input, but failed"
+
+untilFail :: Parser a -> Parser (Maybe a)
+untilFail (Parser p) =
+    Parser $ \input ->
+        case runParser eof input of
+            Right ((), "") -> Right (Nothing, "")
+            _ ->
+                case p input of
+                    Right (a, remain) -> Right (Just a, remain)
+                    Left _ -> Right (Nothing, input)
+
+enclosed :: Char -> Char -> Parser Text
+enclosed st fn = go 0
   where
-    parseApplyFT :: Text -> ParseState FieldType
-    parseApplyFT t =
-        case goMany id t of
-            PSSuccess (ft:fts) t' -> PSSuccess (foldl' FTApp ft fts) t'
-            PSSuccess [] _ -> PSFail "empty"
-            PSFail err -> PSFail err
-            PSDone -> PSDone
+    go :: Int -> Parser Text
+    go n = do
+        ch <- anyChar
+        case n of
+            0 | ch == st ->
+                go (n + 1)
+            0 ->
+                parseError $ \input ->
+                  "satisfy: unexpected '" <> T.singleton ch <> "' in '" <> T.cons ch input <> "'"
+            _ -> fmap (fromMaybe "") $ untilFail $ do
+                case ch of
+                    _ | ch == st -> do
+                        next <- go (n + 1)
+                        pure $ T.cons ch next
+                    _ | n == 1 && ch == fn -> do
+                        pure mempty
+                    _ | ch == fn -> do
+                        next <- go (n - 1)
+                        pure $ T.cons ch next
+                    _ -> do
+                        next <- go n
+                        pure $ T.cons ch next
 
-    parseEnclosed :: Char -> (FieldType -> FieldType) -> Text -> ParseState FieldType
-    parseEnclosed end ftMod t =
-      let (a, b) = T.break (== end) t
-      in case parseApplyFT a of
-          PSSuccess ft t' -> case (T.dropWhile isSpace t', T.uncons b) of
-              ("", Just (c, t'')) | c == end -> PSSuccess (ftMod ft) (t'' `Data.Monoid.mappend` t')
-              (x, y) -> PSFail $ show (b, x, y)
-          x -> PSFail $ show x
+parseFieldType :: Text -> Either Text FieldType
+parseFieldType =
+    runParserFinal parseFieldType'
 
-    parse1 :: Text -> ParseState FieldType
-    parse1 t =
-        case T.uncons t of
-            Nothing -> PSDone
-            Just (c, t')
-                | isSpace c -> parse1 $ T.dropWhile isSpace t'
-                | c == '(' -> parseEnclosed ')' id t'
-                | c == '[' -> parseEnclosed ']' FTList t'
-                | isUpper c || c == '\'' ->
-                    let (a, b) = T.break (\x -> isSpace x || x `elem` ("()[]"::String)) t'
-                     in PSSuccess (parseFieldTypePiece c a) b
-                | otherwise -> PSFail $ show (c, t')
+parseFieldType' :: Parser FieldType
+parseFieldType' = do
+    tys <- parseMany
+    case tys of
+        [] -> parseError (const "empty")
+        ft : fts -> pure $ foldl' FTApp ft fts
+  where
+    parseEnclosed :: Char -> Char -> Parser FieldType
+    parseEnclosed srt end = do
+        t <- enclosed srt end
+        Parser $ \input -> do
+            ft' <- runParserFinal parseFieldType' t
+            pure (ft', input)
 
-    goMany :: ([FieldType] -> a) -> Text -> ParseState a
-    goMany front t =
-        case parse1 t of
-            PSSuccess x t' -> goMany (front . (x:)) t'
-            PSFail err -> PSFail err
-            PSDone -> PSSuccess (front []) t
-            -- _ ->
+    parseMany :: Parser [FieldType]
+    parseMany = do
+        curr <- currentChar
+        case curr of
+            Just c | isSpace c -> anyChar >>= const parseMany
+            Just c -> do
+                n <- case c of
+                    _ | c == '(' -> parseEnclosed '(' ')'
+                    _ | c == '[' -> FTList <$> (parseEnclosed '[' ']')
+                    _ | otherwise -> parseFieldTypePiece
+                t2 <- untilFail parseMany
+                pure $ case t2 of
+                    Nothing ->
+                        [n]
+                    Just t2' ->
+                        n : t2'
+            Nothing ->
+                parseError (const "out of input")
 
-parseFieldTypePiece :: Char -> Text -> FieldType
-parseFieldTypePiece fstChar rest =
+parseFieldTypePiece :: Parser FieldType
+parseFieldTypePiece = do
+    c <- satisfy validFirstChar
+    t <- whileChar (not . invalidChar)
+    pure $ parseFieldTypePiece' c t
+  where
+    validFirstChar c =
+        isUpper c || c == '\''
+
+    invalidChar x =
+        isSpace x || x `elem` ("()[]"::String)
+
+parseFieldTypePiece' :: Char -> Text -> FieldType
+parseFieldTypePiece' fstChar rest =
     case fstChar of
         '\'' ->
             FTTypePromoted rest
@@ -204,8 +325,10 @@ tokenize t
     | Just txt <- T.stripPrefix "-- | " t = [DocComment txt]
     | "--" `T.isPrefixOf` t = [] -- Comment until the end of the line.
     | "#" `T.isPrefixOf` t = [] -- Also comment to the end of the line, needed for a CPP bug (#110)
-    | T.head t == '"' = quotes (T.tail t) id
-    | T.head t == '(' = parens 1 (T.tail t) id
+    | Just quoted <- parseQuotes' t = quoted
+    | Just parened <- parseParens' t = parened
+    -- | Right quoted <- runParserFinal parseQuotes t = quoted
+    -- | Right parened <- runParserFinal parseParens t = parened
     | isSpace (T.head t) =
         tokenize (T.dropWhile isSpace t)
 
@@ -226,6 +349,24 @@ tokenize t
                 | "\"" `T.isPrefixOf` y || "(" `T.isPrefixOf` y -> Just (x, y)
             _ -> Nothing
 
+parseQuotes :: Text -> Maybe [Token]
+parseQuotes t =
+    case runParserFinal parseQuotesP t of
+        Right a -> Just a
+        _ -> Nothing
+
+parseQuotesP :: Parser [Token]
+parseQuotesP = do
+    as <- tokenize <$> enclosed '"' '"'
+    bs <- fromMaybe [] <$> untilFail parseQuotesP
+    pure $ as <> bs
+
+parseQuotes' :: Text -> Maybe [Token]
+parseQuotes' t =
+    if T.head t == '"'
+       then Just $ quotes (T.tail t) id
+       else Nothing
+  where
     quotes :: Text -> ([Text] -> [Text]) -> [Token]
     quotes t' front
         | T.null t' = error $ T.unpack $ T.concat $
@@ -237,6 +378,24 @@ tokenize t
             let (x, y) = T.break (`elem` ['\\','\"']) t'
              in quotes y (front . (x:))
 
+parseParens :: Text -> Maybe [Token]
+parseParens t =
+    case runParserFinal parseParensP t of
+        Right a -> Just a
+        _ -> Nothing
+
+parseParensP :: Parser [Token]
+parseParensP = do
+    as <- tokenize <$> enclosed '(' ')'
+    bs <- fromMaybe [] <$> untilFail parseParensP
+    pure $ as <> bs
+
+parseParens' :: Text -> Maybe [Token]
+parseParens' t =
+    if T.head t == '('
+       then Just $ parens 1 (T.tail t) id
+       else Nothing
+  where
     parens :: Int -> Text -> ([Text] -> [Text]) -> [Token]
     parens count t' front
         | T.null t' = error $ T.unpack $ T.concat $
@@ -854,10 +1013,10 @@ isCapitalizedText t =
 takeColsEx :: PersistSettings -> [Text] -> Maybe UnboundFieldDef
 takeColsEx =
     takeCols
-        (\ft perr -> error $ "Invalid field type " ++ show ft ++ " " ++ perr)
+        (\ft perr -> error $ T.unpack $ "Invalid field type \"" <> ft <> "\" " <> perr)
 
 takeCols
-    :: (Text -> String -> Maybe UnboundFieldDef)
+    :: (Text -> Text -> Maybe UnboundFieldDef)
     -> PersistSettings
     -> [Text]
     -> Maybe UnboundFieldDef

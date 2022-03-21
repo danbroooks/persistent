@@ -8,6 +8,7 @@ module Database.Persist.QuasiSpec where
 import Prelude hiding (lines)
 
 import Control.Exception
+import qualified Data.Char as C
 import Data.List hiding (lines)
 import Data.List.NonEmpty (NonEmpty(..), (<|))
 import qualified Data.List.NonEmpty as NEL
@@ -24,6 +25,111 @@ import Text.Shakespeare.Text (st)
 
 spec :: Spec
 spec = describe "Quasi" $ do
+    describe "satisfy" $ do
+        it "" $ do
+            runParser (char 'a') "a" `shouldBe` Right ('a', "")
+        it "" $ do
+            runParser (char 'a') "b" `shouldBe` Left "satisfy: unexpected 'b' in 'b'"
+
+    describe "anything" $ do
+        it "" $ do
+            runParser anything "hello" `shouldBe` Right ("hello", "")
+
+    describe "whileChar" $ do
+        it "" $ do
+            runParser (whileChar C.isAlpha) "hello" `shouldBe` Right ("hello", "")
+        it "" $ do
+            runParser (whileChar C.isAlpha) "hell0" `shouldBe` Right ("hell", "0")
+        it "" $ do
+            runParser (whileChar C.isAlpha) "hello world" `shouldBe` Right ("hello", " world")
+
+    describe "enclosed" $ do
+        it "" $ do
+            runParser (enclosed '(' ')') "hello" `shouldBe` Left "satisfy: unexpected 'h' in 'hello'"
+        it "" $ do
+            runParser (enclosed '(' ')') "(hello)" `shouldBe` Right ("hello", "")
+        it "" $ do
+            runParser (enclosed '(' ')') "((hello) world)" `shouldBe` Right ("(hello) world", "")
+        it "" $ do
+            runParser (enclosed '(' ')') "((hello) to) the world" `shouldBe` Right ("(hello) to", " the world")
+
+    describe "parseQuotes" $ do
+        it "no quotes no result" $ do
+            parseQuotes "sdadsadsads" `shouldBe` Nothing
+
+        it "carries on parsing tokens after" $ do
+            parseQuotes "\"real\" test" `shouldBe`
+                Just
+                    [ Token "real"
+                    , Token "test"
+                    ]
+
+        xit "error" $ do
+            evaluate (parseQuotes "\"" == Just [])
+                `shouldThrow`
+                    errorCall "Unterminated quoted string starting with "
+
+        xit "handles quotes" $
+            parseQuotes "\"baz\"" `shouldBe`
+                Just
+                    [ Token "baz"
+                    ]
+
+        xit "handles multiple quotes" $
+            parseQuotes "\"foo bar\"  \"baz\"" `shouldBe`
+                Just
+                    [ Token "foo bar"
+                    , Token "baz"
+                    ]
+
+        xit "handles escaped quote" $
+            parseQuotes "\"the \\\"escaped\\\" foo bar\"" `shouldBe`
+                Just
+                    [ Token "the \"escaped\" foo bar"
+                    ]
+
+    describe "parseParens" $ do
+        xit "no parens no result" $ do
+            parseParens "asdds" `shouldBe` Nothing
+
+        xit "error" $ do
+            evaluate (parseParens "(" == Just [])
+                `shouldThrow`
+                    errorCall "Unterminated parens string starting with "
+
+        xit "handles parens" $
+            parseParens "(baz)" `shouldBe`
+                Just
+                    [ Token "baz"
+                    ]
+
+        xit "handles unnested parantheses" $
+            parseParens "(foo bar)  (baz)" `shouldBe`
+                Just
+                    [ Token "foo bar"
+                    , Token "baz"
+                    ]
+
+        xit "handles nested parantheses" $
+            parseParens "(foo (bar))  (baz)" `shouldBe`
+                Just
+                    [ Token "foo (bar)"
+                    , Token "baz"
+                    ]
+
+        xit "escaping" $
+            parseParens "(foo \\(bar)  y=\"baz\\\"\"" `shouldBe`
+                Just
+                    [ Token "foo (bar"
+                    , Token "y=baz\""
+                    ]
+
+        xit "quote in paren" $
+            parseParens "(bin\")" `shouldBe`
+                Just
+                    [ Token "bin\""
+                    ]
+
     describe "parseEntityFields" $ do
         let helloWorldTokens = Token "hello" :| [Token "world"]
             foobarbazTokens = Token "foo" :| [Token "bar", Token "baz"]
@@ -85,7 +191,7 @@ spec = describe "Quasi" $ do
         it "errors on invalid input" $ do
             evaluate (subject ["name", "int"])
                 `shouldThrow`
-                    errorCall "Invalid field type \"int\" PSFail ('i',\"nt\")"
+                    errorCall "Invalid field type \"int\" satisfy: unexpected 'i' in 'int'"
         it "works if it has a name and a type" $ do
             subject ["asdf", "Int"]
                 `shouldBe`
@@ -216,6 +322,16 @@ spec = describe "Quasi" $ do
                         [ Token "foo"
                         , Token "bar"
                         , Token "baz=bin\""
+                        ]
+                    )
+
+        it "quoted content" $
+            parseLine "foo \"bar\" baz" `shouldBe`
+                Just
+                    ( Line 0
+                        [ Token "foo"
+                        , Token "bar"
+                        , Token "baz"
                         ]
                     )
 
@@ -685,6 +801,11 @@ CustomerTransfer
                 baz = FTTypeCon Nothing "Baz"
             parseFieldType "Foo (Bar Baz)" `shouldBe` Right (
                 foo `FTApp` (bar `FTApp` baz))
+        it "nested parens" $ do
+            let maybeCon = FTTypeCon Nothing "Maybe"
+                int = FTTypeCon Nothing "Int"
+            parseFieldType "Maybe (Maybe (Maybe Int))" `shouldBe` Right
+              (maybeCon `FTApp` (maybeCon `FTApp` (maybeCon `FTApp` int)))
         it "lists" $ do
             let foo = FTTypeCon Nothing "Foo"
                 bar = FTTypeCon Nothing "Bar"
@@ -703,7 +824,11 @@ CustomerTransfer
             parseFieldType "[Maybe (Maybe Int)]" `shouldBe` Right
               (FTList (maybeCon `FTApp` (maybeCon `FTApp` int)))
         it "fails on lowercase starts" $ do
-            parseFieldType "nothanks" `shouldBe` Left "PSFail ('n',\"othanks\")"
+            parseFieldType "nothanks" `shouldBe` Left "satisfy: unexpected \'n\' in \'nothanks\'"
+        it "empty input error" $ do
+            parseFieldType " " `shouldBe` Left "out of input"
+        it "empty input error" $ do
+            parseFieldType "" `shouldBe` Left "out of input"
 
     describe "#1175 empty entity" $ do
         let subject =
