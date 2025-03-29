@@ -371,6 +371,89 @@ Notification
             entityComments (unboundEntityDef car) `shouldBe` Just "This is a Car\n"
             entityComments (unboundEntityDef vehicle) `shouldBe` Nothing
 
+        describe "custom Id column" $ do
+            it "parses custom Id column" $ do
+                let definitions = [st|
+User
+    Id   Text
+    name Text
+    age  Int
+|]
+                let [user] = parse lowerCaseSettings definitions
+                getUnboundEntityNameHS user `shouldBe` EntityNameHS "User"
+                entityDB (unboundEntityDef user) `shouldBe` EntityNameDB "user"
+                let idFields = NEL.toList (entitiesPrimary (unboundEntityDef user))
+                (fieldHaskell <$> idFields) `shouldBe` [FieldNameHS "Id"]
+                (fieldDB <$> idFields) `shouldBe` [FieldNameDB "id"]
+                (fieldType <$> idFields) `shouldBe` [FTTypeCon Nothing "Text"]
+                (unboundFieldNameHS <$> unboundEntityFields user) `shouldBe`
+                    [ FieldNameHS "name"
+                    , FieldNameHS "age"
+                    ]
+
+            it "errors on duplicate custom Id column" $ do
+                let definitions = [st|
+User
+    Id   Text
+    Id   Text
+    name Text
+    age  Int
+|]
+                let [user] = parse lowerCaseSettings definitions
+                    errMsg = [st|expected only one Id declaration per entity|]
+                evaluate (unboundEntityDef user) `shouldThrow`
+                    errorCall (T.unpack errMsg)
+
+        describe "primary declaration" $ do
+            it "parses Primary declaration" $ do
+                let definitions = [st|
+User
+    ref Text
+    name Text
+    age  Int
+    Primary ref
+|]
+                let [user] = parse lowerCaseSettings definitions
+                getUnboundEntityNameHS user `shouldBe` EntityNameHS "User"
+                entityDB (unboundEntityDef user) `shouldBe` EntityNameDB "user"
+                let idFields = NEL.toList (entitiesPrimary (unboundEntityDef user))
+                (fieldHaskell <$> idFields) `shouldBe` [FieldNameHS "Id"]
+                (fieldDB <$> idFields) `shouldBe` [FieldNameDB "id"]
+                (fieldType <$> idFields) `shouldBe` [FTTypeCon Nothing "UserId"]
+                (unboundFieldNameHS <$> unboundEntityFields user) `shouldBe`
+                    [ FieldNameHS "ref"
+                    , FieldNameHS "name"
+                    , FieldNameHS "age"
+                    ]
+
+            it "errors on duplicate custom Primary declaration" $ do
+                let definitions = [st|
+User
+    ref Text
+    name Text
+    age  Int
+    Primary ref
+    Primary name
+|]
+                let [user] = parse lowerCaseSettings definitions
+                    errMsg = [st|expected only one Primary declaration per entity|]
+                evaluate (unboundEntityDef user) `shouldThrow`
+                    errorCall (T.unpack errMsg)
+
+            it "errors on conflicting Primary/Id declarations" $ do
+                let definitions = [st|
+User
+    Id Text
+    ref Text
+    name Text
+    age  Int
+    Primary ref
+|]
+                let [user] = parse lowerCaseSettings definitions
+                    errMsg = [st|Specified both an ID field and a Primary field|]
+                evaluate (unboundEntityDef user) `shouldThrow`
+                    errorCall (T.unpack errMsg)
+
         it "should error on malformed input, unterminated parens" $ do
             let definitions = [st|
 User
