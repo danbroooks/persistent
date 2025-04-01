@@ -204,24 +204,19 @@ spec = describe "Comments" $ do
         let edef = entityDef (Proxy :: Proxy Upload)
 
         getEntityComments edef
-            `shouldBe` Nothing
-            -- `shouldBe` Just "Represents an uploaded file"
+            `shouldBe` Just "Represents an uploaded file\n"
 
         let [pathField, uploadedField, sizeField, mimeField] = getEntityFields edef
 
         fieldComments pathField
-            `shouldBe` Nothing
-            -- `shouldBe` Just "Filesystem path"
+            `shouldBe` Just "Filesystem path\n"
 
         fieldComments uploadedField
-            `shouldBe` Nothing
-            -- `shouldBe` Just "when the file was uploaded"
+            `shouldBe` Just "when the file was uploaded\n"
 
         fieldComments sizeField
-            `shouldBe` Nothing
-            -- `shouldBe` Just "in bytes"
+            `shouldBe` Just "in bytes\n"
 
         fieldComments mimeField
-            `shouldBe` Nothing
-            -- `shouldBe` Just "MIME type, like image/png"
+            `shouldBe` Just "MIME type, like image/png\n"
 
